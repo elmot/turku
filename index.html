@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Turku SightSeeings</title>
+    <link type="text/css" rel="stylesheet" href="css/loading.css"/>
+    <link type="text/css" rel="stylesheet" href="fonts/Vaadin-Icons.css"/>
+    <!-- Import Web Component polyfills from CDN -->
+    <script src='https://cdn.vaadin.com/vaadin-components/latest/webcomponentsjs/webcomponents-lite.js'></script>
+    <link href='https://cdn.vaadin.com/vaadin-components/latest/vaadin-grid/vaadin-grid.html' rel='import'>
+
+
+    <script onerror="alert(this)">
+
+
+        function initSpreadSheet(gridQuerySelector, worksheetId, sheetId, skipTopRows) {
+            var sheetUrl = "https://spreadsheets.google.com//feeds/cells/" + worksheetId + "/" + sheetId
+                    + "/public/basic?alt=json-in-script";
+
+            return function () {
+                document.body.className = "wait loading-data";
+                var script = document.createElement("script");
+                script.onerror = function (event) {
+                    document.body.className = "error"
+                };
+                document.head.appendChild(script);
+                gdata = {
+                    io: {
+                        handleScriptLoaded: function (json) {
+                            var arrayData = gdata.data = [];
+                            for (var cellIdx in json.feed.entry) {
+                                var cell = json.feed.entry[cellIdx];
+                                var coords = /\/R(\d+)C(\d+)$/.exec(cell.id.$t);
+                                var row = parseInt(coords[1]) - 1;
+                                var column = parseInt(coords[2]) - 1;
+                                if (arrayData[row] == null) arrayData[row] = [];
+                                arrayData[row][column] = cell.content.$t
+                            }
+                            vvar data
+                            for(var i = 1; i< arrayData)
+                            grid = document.querySelector(gridQuerySelector);
+                            grid.datasource = function (req) {
+                                var slice = arrayData.slice(req.index, req.index + req.count);
+                                req.success(slice, arrayData.length);
+                            }
+                            document.body.className = ""
+                        }
+                    }
+
+                };
+
+
+                script.src = sheetUrl
+            }
+        }
+
+
+        HTMLImports.whenReady(initSpreadSheet("vaadin-grid", "1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE", "od6", 1))
+    </script>
+
+</head>
+
+<body class="wait loading-elements">
+<vaadin-grid selection-mode="multi">
+    <table>
+        <!-- Define the columns -->
+        <col name="name" header-text="Name" _width="200" sort="true">
+        <col name="type" _width="70" header-text="Type">
+        <col name="description" _width="70" header-text="Description">
+        <col name="url" _width="70" header-text="URL">
+        <col name="map" _width="70" header-text="Map">
+        <col name="kid_rate" _width="70" header-text="Kid rate">
+        <col name="open_hours" _width="70" header-text="Open">
+        <col name="duration" _width="70" header-text="Expected duration">
+        <col name="dist" _width="70" header-text="Distance">
+        <col name="season" _width="70" header-text="Season">
+        <col name="fee" _width="70" header-text="Fee">
+        <col name="transport" _width="70" header-text="Transport">
+    </table>
+</vaadin-grid>
+</body>
+</html>

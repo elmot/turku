@@ -1,0 +1,8 @@
+@font-face {
+    font-family: 'Vaadin-Icons';
+    src: url(Vaadin-Icons.eot);
+    src: url(Vaadin-Icons.eot?#iefix) format('embedded-opentype'),
+    url(Vaadin-Icons.woff) format('woff'),
+    url(Vaadin-Icons.ttf) format('truetype'),
+    url(Vaadin-Icons.svg#icomoon) format('svg');
+}
