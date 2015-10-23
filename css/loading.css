@@ -28,13 +28,12 @@ body.wait * {
 
 body.wait {
     width: 100%;
-    /*background-color: #AAAAAA;*/
     margin: auto;
     text-align: center;
 }
 
 body.wait:before {
-    margin-top: 20%;
+    margin-top: 10%;
     font-size: 2em;
     width: 100%;
     text-align: center;
@@ -43,9 +42,11 @@ body.wait:before {
 
 body.wait:after {
     content: "\e6d2";
+    margin-top:30px;
     font-size: 10em;
     font-family: Vaadin-Icons;
     width: 1em;
+    color: #A0A0A0;
     text-align: center;
     display: inline-block;
 
