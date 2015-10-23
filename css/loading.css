@@ -1,0 +1,108 @@
+body.error * {
+    display: none;
+}
+
+body.error:before {
+    content: "Cannot load data";
+    text-align: center;
+    font-size: 10em;
+    color: red;
+}
+
+body.error {
+    width: 100%;
+    height: auto;
+}
+
+body.loading-elements:before {
+    content: "Loading Elements";
+}
+
+body.loading-data:before {
+    content: "Loading Data";
+}
+
+body.wait * {
+    display: none;
+}
+
+body.wait {
+    width: 100%;
+    margin: auto;
+    text-align: center;
+}
+
+body.wait:before {
+    margin-top: 10%;
+    font-size: 2em;
+    width: 100%;
+    text-align: center;
+    display: inline-block;
+}
+
+body.wait:after {
+    content: "\e6d2";
+    margin-top:30px;
+    font-size: 10em;
+    font-family: Vaadin-Icons;
+    width: 1em;
+    color: #A0A0A0;
+    text-align: center;
+    display: inline-block;
+
+    -webkit-animation-name: spin;
+    -webkit-animation-duration: 4000ms;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+
+    -moz-animation-name: spin;
+    -moz-animation-duration: 4000ms;
+    -moz-animation-iteration-count: infinite;
+    -moz-animation-timing-function: linear;
+
+    -ms-animation-name: spin;
+    -ms-animation-duration: 4000ms;
+    -ms-animation-iteration-count: infinite;
+    -ms-animation-timing-function: linear;
+
+    animation-name: spin;
+    animation-duration: 4000ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+@-ms-keyframes spin {
+    from {
+        -ms-transform: rotate(0deg);
+    }
+    to {
+        -ms-transform: rotate(360deg);
+    }
+}
+
+@-moz-keyframes spin {
+    from {
+        -moz-transform: rotate(0deg);
+    }
+    to {
+        -moz-transform: rotate(360deg);
+    }
+}
+
+@-webkit-keyframes spin {
+    from {
+        -webkit-transform: rotate(0deg);
+    }
+    to {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

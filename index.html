@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Turku SightSeeings</title>
+    <link type="text/css" rel="stylesheet" href="css/loading.css"/>
+    <link type="text/css" rel="stylesheet" href="fonts/Vaadin-Icons.css"/>
+    <!-- Import Web Component polyfills from CDN -->
+    <script src='https://cdn.vaadin.com/vaadin-components/latest/webcomponentsjs/webcomponents-lite.js'></script>
+    <link href='https://cdn.vaadin.com/vaadin-components/latest/vaadin-grid/vaadin-grid.html' rel='import'>
+
+
+    <script onerror="alert(this)">
+
+
+        function initSpreadSheet(gridQuerySelector, worksheetId, sheetId) {
+            var sheetUrl = "https://spreadsheets.google.com//feeds/cells/" + worksheetId + "/" + sheetId
+                    + "/public/basic?alt=json-in-script";
+
+            return function () {
+                document.body.className = "wait loading-data";
+                var script = document.createElement("script");
+                script.onerror = function (event) {
+                    document.body.className = "error"
+                };
+                document.head.appendChild(script);
+                gdata = {
+                    io: {
+                        handleScriptLoaded: function (json) {
+                            var arrayData = gdata.data = [];
+                            for (var cellIdx = 0; cellIdx < json.feed.entry.length; cellIdx++) {
+                                var cell = json.feed.entry[cellIdx];
+                                var coords = /\/R(\d+)C(\d+)$/.exec(cell.id.$t);
+                                var row = parseInt(coords[1]) - 1;
+                                var column = parseInt(coords[2]) - 1;
+                                if (arrayData[row] == null) arrayData[row] = [];
+                                arrayData[row][column] = cell.content.$t
+                            }
+                            var data = [];
+                            for (var i = 1; i < arrayData.length; i++) {
+                                var oldRow = arrayData[i];
+                                var newRow = {};
+                                for (var j = 0; j < oldRow.length; j++)
+                                    newRow[arrayData[0][j]] = arrayData[i][j];
+                                data.push(newRow)
+                            }
+                            grid = document.querySelector(gridQuerySelector);
+                            grid.columns[0].renderer = function (cell) {
+                                var cellText = cell.data;
+                                var url = cell.row.data.URLs
+                                if(url!=null && url.trim() !="")
+                                    cellText = "<a target='userurl' href='" + url + "'>" + cellText + "</a>"
+                                cell.element.innerHTML = cellText
+
+                            };
+                            grid.columns[2].renderer = function (cell) {
+                                var cellText = cell.data;
+                                var url = cell.row.data.Map
+                                if(url!=null && url.trim() !="")
+                                    cellText = "<a target='userMap' href='" + url + "'>" + cellText + "</a>"
+                                cell.element.innerHTML = cellText
+                            };
+                            grid.items = data;
+                            document.body.className = ""
+                        }
+                    }
+
+                };
+                script.src = sheetUrl
+            }
+        }
+
+
+        HTMLImports.whenReady(initSpreadSheet("vaadin-grid", "1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE", "od6"))
+    </script>
+
+</head>
+
+<body class="wait loading-elements">
+<vaadin-grid selection-mode="multi">
+    <table>
+        <!-- Define the columns -->
+        <col name="Name" header-text="Name" sort="true">
+        <col name="Type" header-text="Type">
+        <col name="Description" header-text="Description & Map">
+        <!--<col name="URLs" header-text="URL">-->
+        <!--<col name="Map" header-text="Map">-->
+        <col name="Kid_Rate" header-text="Kid rate">
+        <col name="Open" header-text="Open">
+        <col name="Duration" header-text="Expected duration">
+        <col name="Distance" header-text="Distance">
+        <col name="Season" header-text="Season">
+        <col name="Fee" header-text="Fee">
+        <col name="Transport" header-text="Transport">
+    </table>
+</vaadin-grid>
+</body>
+</html>
