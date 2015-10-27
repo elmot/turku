@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <title>Turku SightSeeings</title>
     <link type="text/css" rel="stylesheet" href="css/loading.css"/>
+    <link type="text/css" rel="stylesheet" href="css/renderers.css"/>
     <link type="text/css" rel="stylesheet" href="fonts/Vaadin-Icons.css"/>
+    <link type="text/css" rel="stylesheet" href="fonts/font-awesome.min.css"/>
     <!-- Import Web Component polyfills from CDN -->
     <script src='https://cdn.vaadin.com/vaadin-components/latest/webcomponentsjs/webcomponents-lite.js'></script>
     <link href='https://cdn.vaadin.com/vaadin-components/latest/vaadin-grid/vaadin-grid.html' rel='import'>
@@ -12,7 +14,14 @@
 
     <script onerror="alert(this)">
 
-
+        var rendererUtils  = {
+            vaadinTypeIcon: function(charCode, tooltip) {
+                return '<span class="vaadin-icon icon" title="' + tooltip + '">&#x' + charCode + ';</span>';
+            },
+            awesomeTypeIcon: function(faClass, tooltip) {
+                return '<span class="icon fa '+ faClass + '" title="' + tooltip + '"></span>';
+            }
+        };
         function initSpreadSheet(gridQuerySelector, worksheetId, sheetId) {
             var sheetUrl = "https://spreadsheets.google.com//feeds/cells/" + worksheetId + "/" + sheetId
                     + "/public/basic?alt=json-in-script";
@@ -47,16 +56,40 @@
                             grid = document.querySelector(gridQuerySelector);
                             grid.columns[0].renderer = function (cell) {
                                 var cellText = cell.data;
-                                var url = cell.row.data.URLs
-                                if(url!=null && url.trim() !="")
+                                var url = cell.row.data.URLs;
+                                if (url != null && url.trim() != "")
                                     cellText = "<a target='userurl' href='" + url + "'>" + cellText + "</a>"
+
+                                var type = cell.row.data.Type.trim();
+                                switch (type.toLowerCase()) {
+                                    case "":
+                                    case "null":
+                                        break;
+
+                                    case "church":
+                                        cellText += rendererUtils.awesomeTypeIcon("fa-map-signs", type);
+                                        break;
+                                    case "museum":
+                                        cellText += rendererUtils.vaadinTypeIcon("e6aa", type);
+                                        break;
+                                    case "trail":
+                                    case "trails":
+                                        cellText += rendererUtils.awesomeTypeIcon("fa-map-signs", type);
+                                        break;
+                                    case "trip":
+                                        cellText += rendererUtils.awesomeTypeIcon("fa-map-o", type);
+                                        break;
+                                    default:
+                                        cellText += "(" + type + ")"
+                                }
                                 cell.element.innerHTML = cellText
 
+
                             };
-                            grid.columns[2].renderer = function (cell) {
+                            grid.columns[1].renderer = function (cell) {
                                 var cellText = cell.data;
                                 var url = cell.row.data.Map
-                                if(url!=null && url.trim() !="")
+                                if (url != null && url.trim() != "")
                                     cellText = "<a target='userMap' href='" + url + "'>" + cellText + "</a>"
                                 cell.element.innerHTML = cellText
                             };
@@ -81,7 +114,7 @@
     <table>
         <!-- Define the columns -->
         <col name="Name" header-text="Name" sort="true">
-        <col name="Type" header-text="Type">
+        <!--<col name="Type" header-text="Type">-->
         <col name="Description" header-text="Description & Map">
         <!--<col name="URLs" header-text="URL">-->
         <!--<col name="Map" header-text="Map">-->
