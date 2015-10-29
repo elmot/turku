@@ -6,7 +6,7 @@
     <link type="text/css" rel="stylesheet" href="css/loading.css"/>
     <link type="text/css" rel="stylesheet" href="css/renderers.css"/>
     <link type="text/css" rel="stylesheet" href="fonts/Vaadin-Icons.css"/>
-    <link type="text/css" rel="stylesheet" href="fonts/font-awesome.min.css"/>
+    <link type="text/css" rel="stylesheet" href="fonts/map-icons.min.css"/>
     <!-- Import Web Component polyfills from CDN -->
     <script src='https://cdn.vaadin.com/vaadin-components/latest/webcomponentsjs/webcomponents-lite.js'></script>
     <link href='https://cdn.vaadin.com/vaadin-components/latest/vaadin-grid/vaadin-grid.html' rel='import'>
@@ -20,6 +20,9 @@
             },
             awesomeTypeIcon: function(faClass, tooltip) {
                 return '<span class="icon fa '+ faClass + '" title="' + tooltip + '"></span>';
+            },
+            mapTypeIcon: function(mapClass, tooltip) {
+                return '<span class="icon map-icon '+ mapClass + '" title="' + tooltip + '"></span>';
             }
         };
         function initSpreadSheet(gridQuerySelector, worksheetId, sheetId) {
@@ -66,18 +69,38 @@
                                     case "null":
                                         break;
 
+                                    case "activity park":
+                                    case "adventure park":
+                                        cellText += rendererUtils.mapTypeIcon("map-icon-archery", type);
+                                        break;
+                                    case "castle":
+                                        cellText += rendererUtils.mapTypeIcon("map-icon-city-hall", type);
+                                        break;
                                     case "church":
-                                        cellText += rendererUtils.awesomeTypeIcon("fa-map-signs", type);
+                                        cellText += rendererUtils.mapTypeIcon("map-icon-church", type);
                                         break;
                                     case "museum":
-                                        cellText += rendererUtils.vaadinTypeIcon("e6aa", type);
+                                        cellText += rendererUtils.mapTypeIcon("map-icon-museum", type);
+                                        break;
+                                    case "nature":
+                                    case "nature park":
+                                        cellText += rendererUtils.mapTypeIcon("map-icon-climbing", type);
+                                        break;
+                                    case "spa":
+                                        cellText += rendererUtils.mapTypeIcon("map-icon-spa", type);
+                                        break;
+                                    case "ship cruise":
+                                        cellText += rendererUtils.mapTypeIcon("map-icon-boat-tour", type);
                                         break;
                                     case "trail":
                                     case "trails":
-                                        cellText += rendererUtils.awesomeTypeIcon("fa-map-signs", type);
+                                        cellText += rendererUtils.mapTypeIcon("map-icon-trail-walking", type);
                                         break;
                                     case "trip":
-                                        cellText += rendererUtils.awesomeTypeIcon("fa-map-o", type);
+                                        cellText += rendererUtils.mapTypeIcon("map-icon-route", type);
+                                        break;
+                                    case "water park":
+                                        cellText += rendererUtils.mapTypeIcon("map-icon-swimming", type);
                                         break;
                                     default:
                                         cellText += "(" + type + ")"
