@@ -183,11 +183,6 @@
                                 cell.element.innerHTML = html;
                             };
 
-/*
-                            grid.columns[6].renderer = function (cell) {
-                                cell.element.innerHTML = rendererUtils.renderTransport(cell.data);
-                            };
-*/
                             grid.items = data;
                             document.body.className = ""
                         }
@@ -209,17 +204,11 @@
     <table>
         <!-- Define the columns -->
         <col name="Name" header-text="Name" sort="true">
-        <!--<col name="Type" header-text="Type">-->
         <col name="Description" header-text="Description & Map">
-        <!--<col name="URLs" header-text="URL">-->
-        <!--<col name="Map" header-text="Map">-->
         <col name="Kid_Rate" header-text="Kid rate">
         <col name="Open" header-text="Open">
         <col name="Duration" header-text="Expected duration(Distance)">
-        <!--<col name="Distance" header-text="Distance">-->
-        <!--<col name="Season" header-text="Season">-->
         <col name="Fee" header-text="Getting there">
-        <!--<col name="Transport" header-text="Transport">-->
     </table>
 </vaadin-grid>
 </body>
