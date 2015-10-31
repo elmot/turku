@@ -14,15 +14,53 @@
 
     <script onerror="alert(this)">
 
-        var rendererUtils  = {
-            vaadinTypeIcon: function(charCode, tooltip) {
-                return '<span class="vaadin-icon icon" title="' + tooltip + '">&#x' + charCode + ';</span>';
+        var rendererUtils = {
+            vaadinTypeIcon: function (charCode, tooltip, additionalClasses) {
+                if (additionalClasses == null)  additionalClasses = "";
+                return '<span class="vaadin-icon icon ' + additionalClasses + '" title="' + tooltip + '">&#x' + charCode + ';</span>';
             },
-            awesomeTypeIcon: function(faClass, tooltip) {
-                return '<span class="icon fa '+ faClass + '" title="' + tooltip + '"></span>';
+            mapTypeIcon: function (mapClass, tooltip, additionalClasses) {
+                if (additionalClasses == null)  additionalClasses = "";
+                return '<span class="icon map-icon ' + mapClass + ' ' + additionalClasses + '" title="' + tooltip + '"></span>';
             },
-            mapTypeIcon: function(mapClass, tooltip) {
-                return '<span class="icon map-icon '+ mapClass + '" title="' + tooltip + '"></span>';
+            renderTransport: function (transport) {
+                if (transport == null) return "";
+                transport = transport.toUpperCase().split(",");
+                var html = "";
+                for (var j = 0; j < transport.length; j++) {
+                    if (j > 0) html += " , ";
+                    var k = transport[j];
+                    var trHtml = "";
+                    for (var i = k.length - 1; i >= 0; i--) {
+                        switch (k.charAt(i)) {
+                            case ' ':
+                                break;
+                            case 'L':
+                                trHtml = '<span class="transport-long">' + trHtml + '</span>';
+                                break;
+                            case 'W':
+                                trHtml += rendererUtils.mapTypeIcon("map-icon-walking", "Walk");
+                                break;
+                            case 'C':
+                                trHtml += rendererUtils.mapTypeIcon("map-icon-taxi-stand", "Car");
+                                break;
+                            case 'B':
+                                trHtml += rendererUtils.mapTypeIcon("map-icon-bicycling", "Bike");
+                                break;
+                            case 'S':
+                                trHtml += rendererUtils.mapTypeIcon("map-icon-boat-tour", "Ship");
+                                break;
+                            case 'Y':
+                                trHtml += rendererUtils.mapTypeIcon("map-icon-sailing", "Yacht");
+                                break;
+                            case 'F':
+                                trHtml += rendererUtils.mapTypeIcon("map-icon-boat-tour", "Ferry");
+                                break;
+                        }
+                    }
+                    html += trHtml;
+                }
+                return html;
             }
         };
         function initSpreadSheet(gridQuerySelector, worksheetId, sheetId) {
@@ -116,6 +154,40 @@
                                     cellText = "<a target='userMap' href='" + url + "'>" + cellText + "</a>"
                                 cell.element.innerHTML = cellText
                             };
+                            grid.columns[3].renderer = function (cell) {
+                                var cellText = cell.data;
+                                var season = cell.row.data.Season;
+                                if (season != null)
+                                    cellText += "/" + season;
+                                cell.element.innerHTML = cellText
+                            };
+                            grid.columns[4].renderer = function (cell) {
+                                var cellText = cell.data;
+                                var dist = cell.row.data.Distance;
+                                if (dist != "0" && !isNaN(parseInt(dist)))
+                                    cellText += " (" + dist + "km)";
+                                cell.element.innerHTML = cellText
+                            };
+                            grid.columns[5].renderer = function (cell) {
+                                var fee = cell.data.toUpperCase();
+                                var html = "";
+                                switch (fee) {
+                                    case "P":
+                                        html = rendererUtils.vaadinTypeIcon("e60a", "Paid", "money");
+                                        break;
+                                    case "O":
+                                        html = rendererUtils.vaadinTypeIcon("e77e", "Paid Online", "money");
+                                        break;
+                                }
+                                html+= rendererUtils.renderTransport(cell.row.data.Transport);
+                                cell.element.innerHTML = html;
+                            };
+
+/*
+                            grid.columns[6].renderer = function (cell) {
+                                cell.element.innerHTML = rendererUtils.renderTransport(cell.data);
+                            };
+*/
                             grid.items = data;
                             document.body.className = ""
                         }
@@ -143,11 +215,11 @@
         <!--<col name="Map" header-text="Map">-->
         <col name="Kid_Rate" header-text="Kid rate">
         <col name="Open" header-text="Open">
-        <col name="Duration" header-text="Expected duration">
-        <col name="Distance" header-text="Distance">
-        <col name="Season" header-text="Season">
-        <col name="Fee" header-text="Fee">
-        <col name="Transport" header-text="Transport">
+        <col name="Duration" header-text="Expected duration(Distance)">
+        <!--<col name="Distance" header-text="Distance">-->
+        <!--<col name="Season" header-text="Season">-->
+        <col name="Fee" header-text="Getting there">
+        <!--<col name="Transport" header-text="Transport">-->
     </table>
 </vaadin-grid>
 </body>

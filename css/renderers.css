@@ -3,5 +3,17 @@
 }
 
 .icon {
-    padding: 0.2em;
+    padding: 0.2em; font-size: 200%;
+    color: dodgerblue;
+}
+
+.money {
+    color: goldenrod;
+}
+
+.transport-long {
+    border: 1px solid dodgerblue;
+    border-radius: 7px;
+    display: inline-block;
+    padding: 2px;
 }
