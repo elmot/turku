@@ -41,7 +41,7 @@
                     document.body.className = "";
                     var sheets = document.getElementById("sheets");
                     while (sheets.rows.length > 1) sheets.deleteRow(1);
-                    var wSheets = json.feed.entry
+                    var wSheets = json.feed.entry;
                     for(var i = 0; i < wSheets.length; i++){
                         var row = sheets.insertRow();
                         row.insertCell().innerText = wSheets[i].title.$t;
@@ -69,9 +69,11 @@
             var parsed = googleUrlParser.exec(docUrl);
             if (parsed == null) {
                 document.getElementById("run").disabled = true;
+                document.getElementById("sheetId").innerHTML = "";
                 showError("Incorrect url")
             } else {
                 document.getElementById("run").disabled = false;
+                document.getElementById("sheetId").innerHTML = parsed[1];
                 showError(null)
             }
 
@@ -89,6 +91,7 @@
             if (oldScript != null) document.head.removeChild(oldScript);
             var ext_data = document.createElement("script");
             ext_data.id = "ext_data";
+            //noinspection SpellCheckingInspection
             ext_data.onerror = function () {
                 showError('Google Sheets load error');
             };
@@ -109,18 +112,22 @@
 
 <label for="url">Please paste google sheets URL here</label>
 <br/>
-<input type="url" name="url" id="url" onsubmit="startParse()" oninput="verifyUrl()" size="120"
-       value="https://docs.google.com/spreadsheets/d/1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE/edit#gid=0">
+<input type="url" name="url" id="url" onsubmit="startParse()" oninput="verifyUrl()" size="120">
 <input id="run" type="button" name="url" value="Show structure" onclick="startParse()" disabled="disabled">
 <br/>
 <span id="error" class="error" style="visibility: hidden">Incorrect URL</span>
 
 <div class="loadingSign">Loading...</div>
+Document Id:<span id="sheetId"></span>
+
+<br/>
+<br/>
+<br/>
 <table id="sheets">
     <thead>
     <tr>
-        <th>Name</th>
-        <th>Id</th>
+        <th>Worksheet Name</th>
+        <th>Worksheet Id</th>
     </tr>
 
     </thead>
