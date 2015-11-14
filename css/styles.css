@@ -1,0 +1,51 @@
+vaadin-grid {
+    height: 50%;
+}
+
+h1 {
+    background-color: paleturquoise;
+    color: #606060;
+    padding: 1em 0.5em ;
+    width: 50%;
+    display: inline-block;
+}
+/*Grid rendering */
+.vaadin-icon {
+    font-family: Vaadin-Icons;
+}
+
+.icon {
+    padding: 0.2em; font-size: 200%;
+    color: dodgerblue;
+}
+
+.money {
+    color: goldenrod;
+}
+
+.transport-long {
+    border: 1px solid dodgerblue;
+    border-radius: 7px;
+    display: inline-block;
+    padding: 2px;
+}
+
+.transport-long-long {
+    border: 3px double dodgerblue;
+    border-radius: 9px;
+    display: inline-block;
+    padding: 2px;
+}
+
+
+/*Workaround - invisible scrolls*/
+vaadin-grid > div > div.vaadin-grid.style-scope.vaadin-grid-scroller.vaadin-grid-scroller-vertical {
+    visibility: visible!important;
+    width: 20px!important;
+}
+
+vaadin-grid > div > div.vaadin-grid.style-scope.vaadin-grid-scroller.vaadin-grid-scroller-horizontal {
+    visibility: visible!important;
+    height: 20px!important;
+}
+/*End of Workaround*/

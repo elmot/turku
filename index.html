@@ -4,12 +4,16 @@
     <meta charset="UTF-8">
     <title>Turku SightSeeings</title>
     <link type="text/css" rel="stylesheet" href="css/loading.css"/>
-    <link type="text/css" rel="stylesheet" href="css/renderers.css"/>
+    <link type="text/css" rel="stylesheet" href="css/styles.css"/>
     <link type="text/css" rel="stylesheet" href="fonts/Vaadin-Icons.css"/>
     <link type="text/css" rel="stylesheet" href="fonts/map-icons.min.css"/>
     <!-- Import Web Component polyfills from CDN -->
     <script src='https://cdn.vaadin.com/vaadin-components/latest/webcomponentsjs/webcomponents-lite.js'></script>
     <link href='https://cdn.vaadin.com/vaadin-components/latest/vaadin-grid/vaadin-grid.html' rel='import'>
+
+    <!--<link href='https://cdn.rawgit.com/download/polymer-cdn/1.1.4/lib/google-map/google-map.html' rel='import'>-->
+    <!--<link href='https://cdn.rawgit.com/download/polymer-cdn/1.1.4/lib/google-map/google-map-marker.html' rel='import'>-->
+    <!--<link href='https://cdn.rawgit.com/download/polymer-cdn/1.1.4/lib/google-map/google-map-directions.html' rel='import'>-->
 
 
     <script onerror="alert(this)">
@@ -30,41 +34,43 @@
                 for (var j = 0; j < transport.length; j++) {
                     if (j > 0) html += " , ";
                     var k = transport[j];
-                    var trHtml = "";
-                    for (var i = k.length - 1; i >= 0; i--) {
-                        switch (k.charAt(i)) {
-                            case ' ':
-                                break;
-                            case 'L':
-                                trHtml = '<span class="transport-long">' + trHtml + '</span>';
-                                break;
-                            case 'W':
-                                trHtml += rendererUtils.mapTypeIcon("map-icon-walking", "Walk");
-                                break;
-                            case 'C':
-                                trHtml += rendererUtils.mapTypeIcon("map-icon-taxi-stand", "Car");
-                                break;
-                            case 'B':
-                                trHtml += rendererUtils.mapTypeIcon("map-icon-bicycling", "Bike");
-                                break;
-                            case 'S':
-                                trHtml += rendererUtils.mapTypeIcon("map-icon-boat-tour", "Ship");
-                                break;
-                            case 'Y':
-                                trHtml += rendererUtils.mapTypeIcon("map-icon-sailing", "Yacht");
-                                break;
-                            case 'F':
-                                trHtml += rendererUtils.mapTypeIcon("map-icon-boat-tour", "Ferry");
-                                break;
-                        }
+                    var routeLengthCss = "";
+                    var routeLengthPrefix = "";
+                    if (k.indexOf("LL") >= 0) {
+                        routeLengthPrefix = "Very Long, ";
+                        routeLengthCss = "transport-long-long";
+                    } else if (k.indexOf("L") >= 0) {
+                        routeLengthPrefix = "Long, "
+                        routeLengthCss = "transport-long";
                     }
+                    var trHtml = "";
+                    if (k.indexOf("B") >= 0) {
+                        trHtml += rendererUtils.mapTypeIcon("map-icon-bicycling", routeLengthPrefix + "Bike");
+                    }
+                    if (k.indexOf("C") >= 0) {
+                        trHtml += rendererUtils.mapTypeIcon("map-icon-taxi-stand", routeLengthPrefix + "Car");
+                    }
+                    if (k.indexOf("W") >= 0) {
+                        trHtml += rendererUtils.mapTypeIcon("map-icon-walking", routeLengthPrefix + "Walk");
+                    }
+                    if (k.indexOf("Y") >= 0) {
+                        trHtml += rendererUtils.mapTypeIcon("map-icon-sailing", routeLengthPrefix + "Yacht");
+                    }
+                    if (k.indexOf("S") >= 0) {
+                        trHtml += rendererUtils.mapTypeIcon("map-icon-boat-tour", routeLengthPrefix + "Ship");
+                    }
+                    if (k.indexOf("F") >= 0) {
+                        trHtml += rendererUtils.mapTypeIcon("map-icon-boat-tour", routeLengthPrefix + "Ferry");
+                    }
+                    if (routeLengthCss != "")
+                        trHtml = '<span class="' + routeLengthCss + '">' + trHtml + '</span>';
                     html += trHtml;
                 }
                 return html;
             }
         };
         function initSpreadSheet(gridQuerySelector, worksheetId, sheetId) {
-            var sheetUrl = "https://spreadsheets.google.com//feeds/cells/" + worksheetId + "/" + sheetId
+            var sheetUrl = "https://spreadsheets.google.com/feeds/cells/" + worksheetId + "/" + sheetId
                     + "/public/basic?alt=json-in-script";
 
             return function () {
@@ -178,8 +184,11 @@
                                     case "O":
                                         html = rendererUtils.vaadinTypeIcon("e77e", "Paid Online", "money");
                                         break;
+                                    default:
+                                        html = rendererUtils.vaadinTypeIcon("A0", "", "money");
+                                        break;
                                 }
-                                html+= rendererUtils.renderTransport(cell.row.data.Transport);
+                                html += rendererUtils.renderTransport(cell.row.data.Transport);
                                 cell.element.innerHTML = html;
                             };
 
@@ -200,6 +209,8 @@
 </head>
 
 <body class="wait loading-elements">
+<h1>Turku SightSeeings</h1>
+
 <vaadin-grid selection-mode="multi">
     <table>
         <!-- Define the columns -->
