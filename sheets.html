@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style type="text/css">
+        body .loadingSign {
+            visibility: hidden
+        }
+
+        body.loading .loadingSign {
+            visibility: visible;
+            font-size: 200%;
+            font-style: italic;
+            color: cadetblue;
+            width: 100%;
+            text-align: center;
+        }
+
+        .error {
+            color: darkred;
+            font-weight: bold
+        }
+
+        #sheets {
+            border-collapse: collapse;
+            width: 40%;
+        }
+        #sheets td,th {
+            width: 50%;
+            border: 2px solid lightblue;
+        }
+    </style>
+
+    <title>Google Sheets Structure</title>
+    <script>
+        var googleUrlParser = /^https:\/\/docs\.google\.com\/spreadsheets\/d\/([^/]+)/;
+
+        var gdata = {
+            io: {
+                handleScriptLoaded: function (json) {
+                    document.body.className = "";
+                    var sheets = document.getElementById("sheets");
+                    while (sheets.rows.length > 1) sheets.deleteRow(1);
+                    var wSheets = json.feed.entry
+                    for(var i = 0; i < wSheets.length; i++){
+                        var row = sheets.insertRow();
+                        row.insertCell().innerText = wSheets[i].title.$t;
+                        var wId = wSheets[i].id.$t;
+                        row.insertCell().innerText = /\/(.[^/]+)$/.exec(wId)[1]
+                    }
+                }
+            }
+
+        };
+
+        function showError(text) {
+            document.body.className = "";
+            var elm = document.getElementById("error");
+            if (text != null && text != "") {
+                elm.innerHTML = text;
+                elm.style.visibility = "visible"
+            } else {
+                elm.style.visibility = "hidden"
+            }
+        }
+
+        function verifyUrl() {
+            var docUrl = document.getElementById("url").value.trim();
+            var parsed = googleUrlParser.exec(docUrl);
+            if (parsed == null) {
+                document.getElementById("run").disabled = true;
+                showError("Incorrect url")
+            } else {
+                document.getElementById("run").disabled = false;
+                showError(null)
+            }
+
+        }
+
+        function startParse() {
+            var docUrl = document.getElementById("url").value.trim();
+            var parsed = googleUrlParser.exec(docUrl);
+            if (parsed == null) {
+                showError("Incorrect url");
+                return
+            }
+            document.body.className = "loading";
+            var oldScript = document.getElementById("ext_data");
+            if (oldScript != null) document.head.removeChild(oldScript);
+            var ext_data = document.createElement("script");
+            ext_data.id = "ext_data";
+            ext_data.onerror = function () {
+                showError('Google Sheets load error');
+            };
+            document.head.appendChild(ext_data);
+            ext_data.src = "https://spreadsheets.google.com/feeds/worksheets/" + parsed[1]
+                    + "/public/basic?alt=json-in-script";
+
+
+        }
+
+    </script>
+
+
+</head>
+
+<body>
+<h1>Google Sheets Structure</h1>
+
+<label for="url">Please paste google sheets URL here</label>
+<br/>
+<input type="url" name="url" id="url" onsubmit="startParse()" oninput="verifyUrl()" size="120"
+       value="https://docs.google.com/spreadsheets/d/1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE/edit#gid=0">
+<input id="run" type="button" name="url" value="Show structure" onclick="startParse()" disabled="disabled">
+<br/>
+<span id="error" class="error" style="visibility: hidden">Incorrect URL</span>
+
+<div class="loadingSign">Loading...</div>
+<table id="sheets">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Id</th>
+    </tr>
+
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+</body>
+</html>
