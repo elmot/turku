@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html lang='en'>
+<!--TODO paper tooltip-->
+<!--TODO sorting-->
+<!--TODO data retrieving element-->
 <head>
     <meta charset='UTF-8'>
     <link rel="icon" sizes="16x16" href="Flag_of_turku_Finland.png">
@@ -27,7 +30,7 @@
             },
             mapTypeIcon: function (mapClass, tooltip, additionalClasses) {
                 if (additionalClasses == null)  additionalClasses = '';
-                return '<span class="icon map-icon ' + mapClass + ' ' + additionalClasses + '" title="' + tooltip + '"></span>';
+                return '<span class="icon map-icon ' + mapClass + ' ' + additionalClasses + '" title="' + tooltip + '" onclick="showTooltip(this)"></span>';
             },
             renderTransport: function (transport) {
                 if (transport == null) return '';
@@ -204,12 +207,38 @@
                 script.src = sheetUrl
             }
         }
+        function showTooltip(elm) {
+            if (elm.title != null && elm.title.trim() != "") alert(elm.title); else if (event.srcElement.title != null && event.srcElement.title.trim() != "") alert(elm.title);
+        }
 
         function switchView() {
             var collapseMap = document.querySelector("#collapse-map");
             collapseMap.toggle();
-            document.querySelector("#collapse-grid").opened = !collapseMap.opened;
-            document.querySelector("#map").notifyResize()
+            var mapOpened = collapseMap.opened;
+            document.querySelector("#collapse-grid").opened = !mapOpened;
+            var map = document.querySelector("#map");
+            map.notifyResize();
+            map.clear();
+            var grid = document.querySelector("#grid");
+            if (mapOpened) {
+                grid.selection.selected(function(index) {
+                    var row = grid.data.source[index];
+                    var markerData = /@(-?\d+\.\d*),(-?\d+\.\d*)/.exec(row.Map)
+                    if(markerData == null) return;
+
+                    new google.maps.Marker({
+                        map: map.map,
+                        position: {lat: parseFloat(markerData[1]), lng: parseFloat(markerData[2])},
+                        title: row.Name
+                    });
+
+/*
+                    marker.setAttribute("latitude",60.46+index/20)
+                    marker.setAttribute("longitude",22.33-index/20)
+                    map.appendChild(marker)
+*/
+                })
+            }
         }
         HTMLImports.whenReady(initSpreadSheet('vaadin-grid', '1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE', 'od6'))
     </script>
@@ -222,14 +251,14 @@
 
 <button onclick='switchView()' class="heading">Map/Table</button>
 <iron-collapse id='collapse-map'>
-    <google-map id='map' latitude='60.46' longitude='22.33' >
+    <google-map id='map' latitude='60.46' longitude='22.33'>
     </google-map>
 </iron-collapse>
 <iron-collapse id='collapse-grid' opened>
     <vaadin-grid selection-mode="multi" id="grid">
         <table>
             <!-- Define the columns -->
-            <col name="Name" header-text="Name" sort="true">
+            <col name="Name" header-text="Name" sortable="">
             <col name="Description" header-text="Description & Map">
             <col name="Kid_Rate" header-text="Kid rate">
             <col name="Open" header-text="Open">
