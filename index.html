@@ -218,7 +218,7 @@
             document.querySelector("#collapse-grid").opened = !mapOpened;
             var map = document.querySelector("#map");
             map.notifyResize();
-            map.clear();
+            map.map.clear();
             var grid = document.querySelector("#grid");
             if (mapOpened) {
                 grid.selection.selected(function(index) {
@@ -231,12 +231,6 @@
                         position: {lat: parseFloat(markerData[1]), lng: parseFloat(markerData[2])},
                         title: row.Name
                     });
-
-/*
-                    marker.setAttribute("latitude",60.46+index/20)
-                    marker.setAttribute("longitude",22.33-index/20)
-                    map.appendChild(marker)
-*/
                 })
             }
         }
