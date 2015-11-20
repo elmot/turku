@@ -1,68 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang='en'>
 <head>
-    <meta charset="UTF-8">
+    <meta charset='UTF-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Turku SightSeeings</title>
-    <link type="text/css" rel="stylesheet" href="css/loading.css"/>
-    <link type="text/css" rel="stylesheet" href="css/styles.css"/>
-    <link type="text/css" rel="stylesheet" href="fonts/Vaadin-Icons.css"/>
-    <link type="text/css" rel="stylesheet" href="fonts/map-icons.min.css"/>
-    <!-- Import Web Component polyfills from CDN -->
-    <script src='https://cdn.vaadin.com/vaadin-components/latest/webcomponentsjs/webcomponents-lite.js'></script>
-    <link href='https://cdn.vaadin.com/vaadin-components/latest/vaadin-grid/vaadin-grid.html' rel='import'>
+    <link type='text/css' rel='stylesheet' href='css/loading.css'/>
+    <link type='text/css' rel='stylesheet' href='css/styles.css'/>
+    <link type='text/css' rel='stylesheet' href='fonts/Vaadin-Icons.css'/>
+    <link type='text/css' rel='stylesheet' href='fonts/map-icons.min.css'/>
+    <!-- Import Web Components from bower -->
+    <script src='bower_components/webcomponentsjs/webcomponents-lite.min.js'></script>
+    <link href='bower_components/vaadin-grid/vaadin-grid.html' rel='import'>
+    <link href='bower_components/iron-collapse/iron-collapse.html' rel='import'>
+    <link href='bower_components/google-map/google-map.html' rel='import'>
+    <link href='bower_components/google-map/google-map-marker.html' rel='import'>
+    <link href='bower_components/google-map/google-map-directions.html' rel='import'>
 
-    <!--<link href='https://cdn.rawgit.com/download/polymer-cdn/1.1.4/lib/google-map/google-map.html' rel='import'>-->
-    <!--<link href='https://cdn.rawgit.com/download/polymer-cdn/1.1.4/lib/google-map/google-map-marker.html' rel='import'>-->
-    <!--<link href='https://cdn.rawgit.com/download/polymer-cdn/1.1.4/lib/google-map/google-map-directions.html' rel='import'>-->
 
-
-    <script onerror="alert(this)">
+    <script onerror='alert(this)'>
 
         var rendererUtils = {
             vaadinTypeIcon: function (charCode, tooltip, additionalClasses) {
-                if (additionalClasses == null)  additionalClasses = "";
+                if (additionalClasses == null)  additionalClasses = '';
                 return '<span class="vaadin-icon icon ' + additionalClasses + '" title="' + tooltip + '">&#x' + charCode + ';</span>';
             },
             mapTypeIcon: function (mapClass, tooltip, additionalClasses) {
-                if (additionalClasses == null)  additionalClasses = "";
+                if (additionalClasses == null)  additionalClasses = '';
                 return '<span class="icon map-icon ' + mapClass + ' ' + additionalClasses + '" title="' + tooltip + '"></span>';
             },
             renderTransport: function (transport) {
-                if (transport == null) return "";
-                transport = transport.toUpperCase().split(",");
-                var html = "";
+                if (transport == null) return '';
+                transport = transport.toUpperCase().split(',');
+                var html = '';
                 for (var j = 0; j < transport.length; j++) {
-                    if (j > 0) html += " , ";
+                    if (j > 0) html += ' , ';
                     var k = transport[j];
-                    var routeLengthCss = "";
-                    var routeLengthPrefix = "";
-                    if (k.indexOf("LL") >= 0) {
-                        routeLengthPrefix = "Very Long, ";
-                        routeLengthCss = "transport-long-long";
-                    } else if (k.indexOf("L") >= 0) {
-                        routeLengthPrefix = "Long, "
-                        routeLengthCss = "transport-long";
+                    var routeLengthCss = '';
+                    var routeLengthPrefix = '';
+                    if (k.indexOf('LL') >= 0) {
+                        routeLengthPrefix = 'Very Long, ';
+                        routeLengthCss = 'transport-long-long';
+                    } else if (k.indexOf('L') >= 0) {
+                        routeLengthPrefix = 'Long, ';
+                        routeLengthCss = 'transport-long';
                     }
-                    var trHtml = "";
-                    if (k.indexOf("B") >= 0) {
-                        trHtml += rendererUtils.mapTypeIcon("map-icon-bicycling", routeLengthPrefix + "Bike");
+                    var trHtml = '';
+                    if (k.indexOf('B') >= 0) {
+                        trHtml += rendererUtils.mapTypeIcon('map-icon-bicycling', routeLengthPrefix + 'Bike');
                     }
-                    if (k.indexOf("C") >= 0) {
-                        trHtml += rendererUtils.mapTypeIcon("map-icon-taxi-stand", routeLengthPrefix + "Car");
+                    if (k.indexOf('C') >= 0) {
+                        trHtml += rendererUtils.mapTypeIcon('map-icon-taxi-stand', routeLengthPrefix + 'Car');
                     }
-                    if (k.indexOf("W") >= 0) {
-                        trHtml += rendererUtils.mapTypeIcon("map-icon-walking", routeLengthPrefix + "Walk");
+                    if (k.indexOf('W') >= 0) {
+                        trHtml += rendererUtils.mapTypeIcon('map-icon-walking', routeLengthPrefix + 'Walk');
                     }
-                    if (k.indexOf("Y") >= 0) {
-                        trHtml += rendererUtils.mapTypeIcon("map-icon-sailing", routeLengthPrefix + "Yacht");
+                    if (k.indexOf('Y') >= 0) {
+                        trHtml += rendererUtils.mapTypeIcon('map-icon-sailing', routeLengthPrefix + 'Yacht');
                     }
-                    if (k.indexOf("S") >= 0) {
-                        trHtml += rendererUtils.mapTypeIcon("map-icon-boat-tour", routeLengthPrefix + "Ship");
+                    if (k.indexOf('S') >= 0) {
+                        trHtml += rendererUtils.mapTypeIcon('map-icon-boat-tour', routeLengthPrefix + 'Ship');
                     }
-                    if (k.indexOf("F") >= 0) {
-                        trHtml += rendererUtils.mapTypeIcon("map-icon-boat-tour", routeLengthPrefix + "Ferry");
+                    if (k.indexOf('F') >= 0) {
+                        trHtml += rendererUtils.mapTypeIcon('map-icon-boat-tour', routeLengthPrefix + 'Ferry');
                     }
-                    if (routeLengthCss != "")
+                    if (routeLengthCss != '')
                         trHtml = '<span class="' + routeLengthCss + '">' + trHtml + '</span>';
                     html += trHtml;
                 }
@@ -70,14 +71,15 @@
             }
         };
         function initSpreadSheet(gridQuerySelector, worksheetId, sheetId) {
-            var sheetUrl = "https://spreadsheets.google.com/feeds/cells/" + worksheetId + "/" + sheetId
-                    + "/public/basic?alt=json-in-script";
+            var sheetUrl = 'https://spreadsheets.google.com/feeds/cells/' + worksheetId + '/' + sheetId
+                    + '/public/basic?alt=json-in-script';
 
             return function () {
-                document.body.className = "wait loading-data";
-                var script = document.createElement("script");
+                document.body.className = 'wait loading-data';
+                var script = document.createElement('script');
+                //noinspection JSUnusedLocalSymbols
                 script.onerror = function (event) {
-                    document.body.className = "error"
+                    document.body.className = 'error'
                 };
                 document.head.appendChild(script);
                 gdata = {
@@ -100,54 +102,54 @@
                                     newRow[arrayData[0][j]] = arrayData[i][j];
                                 data.push(newRow)
                             }
-                            grid = document.querySelector(gridQuerySelector);
+                            var grid = document.querySelector(gridQuerySelector);
                             grid.columns[0].renderer = function (cell) {
                                 var cellText = cell.data;
                                 var url = cell.row.data.URLs;
-                                if (url != null && url.trim() != "")
-                                    cellText = "<a target='userurl' href='" + url + "'>" + cellText + "</a>"
+                                if (url != null && url.trim() != '')
+                                    cellText = '<a target="userurl" href="' + url + '">' + cellText + '</a>';
 
                                 var type = cell.row.data.Type.trim();
                                 switch (type.toLowerCase()) {
-                                    case "":
-                                    case "null":
+                                    case '':
+                                    case 'null':
                                         break;
 
-                                    case "activity park":
-                                    case "adventure park":
-                                        cellText += rendererUtils.mapTypeIcon("map-icon-archery", type);
+                                    case 'activity park':
+                                    case 'adventure park':
+                                        cellText += rendererUtils.mapTypeIcon('map-icon-archery', type);
                                         break;
-                                    case "castle":
-                                        cellText += rendererUtils.mapTypeIcon("map-icon-city-hall", type);
+                                    case 'castle':
+                                        cellText += rendererUtils.mapTypeIcon('map-icon-city-hall', type);
                                         break;
-                                    case "church":
-                                        cellText += rendererUtils.mapTypeIcon("map-icon-church", type);
+                                    case 'church':
+                                        cellText += rendererUtils.mapTypeIcon('map-icon-church', type);
                                         break;
-                                    case "museum":
-                                        cellText += rendererUtils.mapTypeIcon("map-icon-museum", type);
+                                    case 'museum':
+                                        cellText += rendererUtils.mapTypeIcon('map-icon-museum', type);
                                         break;
-                                    case "nature":
-                                    case "nature park":
-                                        cellText += rendererUtils.mapTypeIcon("map-icon-climbing", type);
+                                    case 'nature':
+                                    case 'nature park':
+                                        cellText += rendererUtils.mapTypeIcon('map-icon-climbing', type);
                                         break;
-                                    case "spa":
-                                        cellText += rendererUtils.mapTypeIcon("map-icon-spa", type);
+                                    case 'spa':
+                                        cellText += rendererUtils.mapTypeIcon('map-icon-spa', type);
                                         break;
-                                    case "ship cruise":
-                                        cellText += rendererUtils.mapTypeIcon("map-icon-boat-tour", type);
+                                    case 'ship cruise':
+                                        cellText += rendererUtils.mapTypeIcon('map-icon-boat-tour', type);
                                         break;
-                                    case "trail":
-                                    case "trails":
-                                        cellText += rendererUtils.mapTypeIcon("map-icon-trail-walking", type);
+                                    case 'trail':
+                                    case 'trails':
+                                        cellText += rendererUtils.mapTypeIcon('map-icon-trail-walking', type);
                                         break;
-                                    case "trip":
-                                        cellText += rendererUtils.mapTypeIcon("map-icon-route", type);
+                                    case 'trip':
+                                        cellText += rendererUtils.mapTypeIcon('map-icon-route', type);
                                         break;
-                                    case "water park":
-                                        cellText += rendererUtils.mapTypeIcon("map-icon-swimming", type);
+                                    case 'water park':
+                                        cellText += rendererUtils.mapTypeIcon('map-icon-swimming', type);
                                         break;
                                     default:
-                                        cellText += "(" + type + ")"
+                                        cellText += '(' + type + ')'
                                 }
                                 cell.element.innerHTML = cellText
 
@@ -155,37 +157,37 @@
                             };
                             grid.columns[1].renderer = function (cell) {
                                 var cellText = cell.data;
-                                var url = cell.row.data.Map
-                                if (url != null && url.trim() != "")
-                                    cellText = "<a target='userMap' href='" + url + "'>" + cellText + "</a>"
+                                var url = cell.row.data.Map;
+                                if (url != null && url.trim() != '')
+                                    cellText = '<a target="userMap" href="' + url + '">' + cellText + '</a>';
                                 cell.element.innerHTML = cellText
                             };
                             grid.columns[3].renderer = function (cell) {
                                 var cellText = cell.data;
                                 var season = cell.row.data.Season;
                                 if (season != null)
-                                    cellText += "/" + season;
+                                    cellText += '/' + season;
                                 cell.element.innerHTML = cellText
                             };
                             grid.columns[4].renderer = function (cell) {
                                 var cellText = cell.data;
                                 var dist = cell.row.data.Distance;
-                                if (dist != "0" && !isNaN(parseInt(dist)))
-                                    cellText += " (" + dist + "km)";
+                                if (dist != '0' && !isNaN(parseInt(dist)))
+                                    cellText += ' (' + dist + 'km)';
                                 cell.element.innerHTML = cellText
                             };
                             grid.columns[5].renderer = function (cell) {
                                 var fee = cell.data.toUpperCase();
-                                var html = "";
+                                var html = '';
                                 switch (fee) {
-                                    case "P":
-                                        html = rendererUtils.vaadinTypeIcon("e60a", "Paid", "money");
+                                    case 'P':
+                                        html = rendererUtils.vaadinTypeIcon('e60a', 'Paid', 'money');
                                         break;
-                                    case "O":
-                                        html = rendererUtils.vaadinTypeIcon("e77e", "Paid Online", "money");
+                                    case 'O':
+                                        html = rendererUtils.vaadinTypeIcon('e77e', 'Paid Online', 'money');
                                         break;
                                     default:
-                                        html = rendererUtils.vaadinTypeIcon("A0", "", "money");
+                                        html = rendererUtils.vaadinTypeIcon('A0', '', 'money');
                                         break;
                                 }
                                 html += rendererUtils.renderTransport(cell.row.data.Transport);
@@ -193,7 +195,7 @@
                             };
 
                             grid.items = data;
-                            document.body.className = ""
+                            document.body.className = ''
                         }
                     }
 
@@ -202,25 +204,38 @@
             }
         }
 
-
-        HTMLImports.whenReady(initSpreadSheet("vaadin-grid", "1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE", "od6"))
+        function switchView() {
+            var collapseMap = document.querySelector("#collapse-map");
+            collapseMap.toggle();
+            document.querySelector("#collapse-grid").opened = !collapseMap.opened;
+            document.querySelector("#map").notifyResize()
+        }
+        HTMLImports.whenReady(initSpreadSheet('vaadin-grid', '1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE', 'od6'))
     </script>
 
 </head>
 
 <body class="wait loading-elements">
-<h1>Turku SightSeeings</h1>
+<div class="page-header">Turku SightSeeings</div>
 
-<vaadin-grid selection-mode="multi">
-    <table>
-        <!-- Define the columns -->
-        <col name="Name" header-text="Name" sort="true">
-        <col name="Description" header-text="Description & Map">
-        <col name="Kid_Rate" header-text="Kid rate">
-        <col name="Open" header-text="Open">
-        <col name="Duration" header-text="Expected duration(Distance)">
-        <col name="Fee" header-text="Getting there">
-    </table>
-</vaadin-grid>
+
+<button onclick='switchView()' class="heading">Map/Table</button>
+<iron-collapse id='collapse-map'>
+    <google-map id='map' latitude='60.46' longitude='22.33' >
+    </google-map>
+</iron-collapse>
+<iron-collapse id='collapse-grid' opened>
+    <vaadin-grid selection-mode="multi" id="grid">
+        <table>
+            <!-- Define the columns -->
+            <col name="Name" header-text="Name" sort="true">
+            <col name="Description" header-text="Description & Map">
+            <col name="Kid_Rate" header-text="Kid rate">
+            <col name="Open" header-text="Open">
+            <col name="Duration" header-text="Expected duration(Distance)">
+            <col name="Fee" header-text="Getting there">
+        </table>
+    </vaadin-grid>
+</iron-collapse>
 </body>
 </html>
