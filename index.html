@@ -106,99 +106,124 @@
                                     newRow[arrayData[0][j]] = arrayData[i][j];
                                 data.push(newRow)
                             }
+
+                            var renderers = {
+                                "Name": function (cell) {
+                                    var cellText = cell.data;
+                                    var url = cell.row.data.URLs;
+                                    if (url != null && url.trim() != '')
+                                        cellText = '<a target="userurl" href="' + url + '">' + cellText + '</a>';
+
+                                    var type = cell.row.data.Type.trim();
+                                    switch (type.toLowerCase()) {
+                                        case '':
+                                        case 'null':
+                                            break;
+
+                                        case 'activity park':
+                                        case 'adventure park':
+                                            cellText += rendererUtils.mapTypeIcon('map-icon-archery', type);
+                                            break;
+                                        case 'castle':
+                                            cellText += rendererUtils.mapTypeIcon('map-icon-city-hall', type);
+                                            break;
+                                        case 'church':
+                                            cellText += rendererUtils.mapTypeIcon('map-icon-church', type);
+                                            break;
+                                        case 'museum':
+                                            cellText += rendererUtils.mapTypeIcon('map-icon-museum', type);
+                                            break;
+                                        case 'nature':
+                                        case 'nature park':
+                                            cellText += rendererUtils.mapTypeIcon('map-icon-climbing', type);
+                                            break;
+                                        case 'spa':
+                                            cellText += rendererUtils.mapTypeIcon('map-icon-spa', type);
+                                            break;
+                                        case 'ship cruise':
+                                            cellText += rendererUtils.mapTypeIcon('map-icon-boat-tour', type);
+                                            break;
+                                        case 'trail':
+                                        case 'trails':
+                                            cellText += rendererUtils.mapTypeIcon('map-icon-trail-walking', type);
+                                            break;
+                                        case 'trip':
+                                            cellText += rendererUtils.mapTypeIcon('map-icon-route', type);
+                                            break;
+                                        case 'water park':
+                                            cellText += rendererUtils.mapTypeIcon('map-icon-swimming', type);
+                                            break;
+                                        default:
+                                            cellText += '(' + type + ')'
+                                    }
+                                    cell.element.innerHTML = cellText
+                                },
+                                "Description": function (cell) {
+                                    var cellText = cell.data;
+                                    var url = cell.row.data.Map;
+                                    if (url != null && url.trim() != '')
+                                        cellText = '<a target="userMap" href="' + url + '">' + cellText + '</a>';
+                                    cell.element.innerHTML = cellText
+                                },
+                                "Open": function (cell) {
+                                    var cellText = cell.data;
+                                    var season = cell.row.data.Season;
+                                    if (season != null)
+                                        cellText += '/' + season;
+                                    cell.element.innerHTML = cellText
+                                },
+                                "Duration": function (cell) {
+                                    var cellText = cell.data;
+                                    var dist = cell.row.data.Distance;
+                                    if (dist != '0' && !isNaN(parseInt(dist)))
+                                        cellText += ' (' + dist + 'km)';
+                                    cell.element.innerHTML = cellText
+                                },
+                                "Fee": function (cell) {
+                                    var fee = cell.data.toUpperCase();
+                                    var html = '';
+                                    switch (fee) {
+                                        case 'P':
+                                            html = rendererUtils.vaadinTypeIcon('e60a', 'Paid', 'money');
+                                            break;
+                                        case 'O':
+                                            html = rendererUtils.vaadinTypeIcon('e77e', 'Paid Online', 'money');
+                                            break;
+                                        default:
+                                            html = rendererUtils.vaadinTypeIcon('A0', '', 'money');
+                                            break;
+                                    }
+                                    html += rendererUtils.renderTransport(cell.row.data.Transport);
+                                    cell.element.innerHTML = html;
+                                }
+
+                            };
                             var grid = document.querySelector(gridQuerySelector);
-                            grid.columns[0].renderer = function (cell) {
-                                var cellText = cell.data;
-                                var url = cell.row.data.URLs;
-                                if (url != null && url.trim() != '')
-                                    cellText = '<a target="userurl" href="' + url + '">' + cellText + '</a>';
+                            grid.columns.filter(function(col){
+                                col.renderer = renderers[col.name];
+                            });
+                            grid.rowDetailsGenerator = function(index) {
+                                var details = document.querySelector("#details").content;
 
-                                var type = cell.row.data.Type.trim();
-                                switch (type.toLowerCase()) {
-                                    case '':
-                                    case 'null':
-                                        break;
-
-                                    case 'activity park':
-                                    case 'adventure park':
-                                        cellText += rendererUtils.mapTypeIcon('map-icon-archery', type);
-                                        break;
-                                    case 'castle':
-                                        cellText += rendererUtils.mapTypeIcon('map-icon-city-hall', type);
-                                        break;
-                                    case 'church':
-                                        cellText += rendererUtils.mapTypeIcon('map-icon-church', type);
-                                        break;
-                                    case 'museum':
-                                        cellText += rendererUtils.mapTypeIcon('map-icon-museum', type);
-                                        break;
-                                    case 'nature':
-                                    case 'nature park':
-                                        cellText += rendererUtils.mapTypeIcon('map-icon-climbing', type);
-                                        break;
-                                    case 'spa':
-                                        cellText += rendererUtils.mapTypeIcon('map-icon-spa', type);
-                                        break;
-                                    case 'ship cruise':
-                                        cellText += rendererUtils.mapTypeIcon('map-icon-boat-tour', type);
-                                        break;
-                                    case 'trail':
-                                    case 'trails':
-                                        cellText += rendererUtils.mapTypeIcon('map-icon-trail-walking', type);
-                                        break;
-                                    case 'trip':
-                                        cellText += rendererUtils.mapTypeIcon('map-icon-route', type);
-                                        break;
-                                    case 'water park':
-                                        cellText += rendererUtils.mapTypeIcon('map-icon-swimming', type);
-                                        break;
-                                    default:
-                                        cellText += '(' + type + ')'
+                                var row = grid.data.source[index];
+                                for (var p in row) {
+                                    var elm = details.getElementById(p);
+                                    if(elm != null) elm.innerHTML = row[p];
                                 }
-                                cell.element.innerHTML = cellText
+                                return details;
+                            };
+                            var detailsOpenIndex = -1;
 
-
-                            };
-                            grid.columns[1].renderer = function (cell) {
-                                var cellText = cell.data;
-                                var url = cell.row.data.Map;
-                                if (url != null && url.trim() != '')
-                                    cellText = '<a target="userMap" href="' + url + '">' + cellText + '</a>';
-                                cell.element.innerHTML = cellText
-                            };
-                            grid.columns[3].renderer = function (cell) {
-                                var cellText = cell.data;
-                                var season = cell.row.data.Season;
-                                if (season != null)
-                                    cellText += '/' + season;
-                                cell.element.innerHTML = cellText
-                            };
-                            grid.columns[4].renderer = function (cell) {
-                                var cellText = cell.data;
-                                var dist = cell.row.data.Distance;
-                                if (dist != '0' && !isNaN(parseInt(dist)))
-                                    cellText += ' (' + dist + 'km)';
-                                cell.element.innerHTML = cellText
-                            };
-                            grid.columns[5].renderer = function (cell) {
-                                var fee = cell.data.toUpperCase();
-                                var html = '';
-                                switch (fee) {
-                                    case 'P':
-                                        html = rendererUtils.vaadinTypeIcon('e60a', 'Paid', 'money');
-                                        break;
-                                    case 'O':
-                                        html = rendererUtils.vaadinTypeIcon('e77e', 'Paid Online', 'money');
-                                        break;
-                                    default:
-                                        html = rendererUtils.vaadinTypeIcon('A0', '', 'money');
-                                        break;
-                                }
-                                html += rendererUtils.renderTransport(cell.row.data.Transport);
-                                cell.element.innerHTML = html;
-                            };
-
+                            // Show details for the selected row
                             grid.items = data;
+                            grid.addEventListener('select', function() {
+                                grid.setRowDetailsVisible(detailsOpenIndex, false);
+                                var selected = grid.selection.selected();
+                                if (selected.length == 1) {
+                                    grid.setRowDetailsVisible(selected[0], true);
+                                    detailsOpenIndex = selected[0];
+                                }
+                            });
                             document.body.className = ''
                         }
                     }
@@ -218,13 +243,13 @@
             document.querySelector("#collapse-grid").opened = !mapOpened;
             var map = document.querySelector("#map");
             map.notifyResize();
-            map.map.clear();
+            map.clear();
             var grid = document.querySelector("#grid");
             if (mapOpened) {
-                grid.selection.selected(function(index) {
+                grid.selection.selected(function (index) {
                     var row = grid.data.source[index];
-                    var markerData = /@(-?\d+\.\d*),(-?\d+\.\d*)/.exec(row.Map)
-                    if(markerData == null) return;
+                    var markerData = /@(-?\d+\.\d*),(-?\d+\.\d*)/.exec(row.Map);
+                    if (markerData == null) return;
 
                     new google.maps.Marker({
                         map: map.map,
@@ -240,6 +265,26 @@
 </head>
 
 <body class="wait loading-elements">
+<template id="details">
+    <div class="row-details">
+        <h1 id="Name"></h1>
+        <h4 id="Type"></h4>
+
+        <div id="Description">
+        </div>
+        <!--
+                URLs
+                Map
+                Kid_Rate
+                Open
+                Duration
+                Distance
+                Season
+                Fee
+                Transport
+        -->
+    </div>
+</template>
 <div class="page-header">Turku SightSeeings</div>
 
 
