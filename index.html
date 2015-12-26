@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang='en'>
-<!--TODO paper tooltip-->
 <!--TODO sorting-->
 <!--TODO data retrieving element-->
 <head>
@@ -205,13 +204,21 @@
                                 col.renderer = renderers[col.name];
                             });
                             grid.rowDetailsGenerator = function(rowIndex) {
+                                var item = grid.items[rowIndex];
                                 var template = document.querySelector("#details");
-                                var elem = document.createElement("div");
-                                elem.setAttribute("class","details-container");
-                                template.model = grid.items[rowIndex];
-                                var details = template.content.querySelector("#row-details");
-                                elem.appendChild(document.importNode(details,true));
-                                return elem;
+                                var detailsDiv = template.content.querySelector("#row-details-root").cloneNode(true);
+                                var fields = ["Description", "Type", "Open", "Duration", "Distance", "Season", "Fee", "Transport"];
+                                for (var i = 0; i < fields.length; i++) {
+                                    detailsDiv.querySelector("#" + fields[i]).innerHTML = item[fields[i]];
+                                }
+                                var urlTag = detailsDiv.querySelector("#url");
+                                if(item.URLs !=null){
+                                    urlTag.href=item.URLs;
+                                    urlTag.style.visibility="inherit";
+                                } else {
+                                    urlTag.style.visibility="hidden";
+                                }
+                                return detailsDiv;
 
                             };
                             var detailsOpenIndex = -1;
@@ -271,23 +278,19 @@
 
 <body class="wait loading-elements">
 <template id="details" bind="model">
-    <div id="row-details">
-        <h1 id="Name">[[Name]]###[[name]]</h1>
-        <h4 id="Type"></h4>
-
-        <div id="Description">
-        </div>
-        <!--
-                URLs
-                Map
-                Kid_Rate
-                Open
-                Duration
-                Distance
-                Season
-                Fee
-                Transport
-        -->
+    <div id="row-details-root">
+        <p>
+            <span class="details-type" id="Type"></span>:
+            <span id="Description"></span>
+            <a id="url" target="_blank" class="vaadin-icon">&#xe725;</a>
+        </p>
+            <p>Good for kids: <span id="Kid_Rate"></span></p>
+            <p>Open: <span id="Open"></span></p>
+            <p>Duration: <span id="Duration"></span></p>
+            <p>Distance, km: <span id="Distance"></span></p>
+            <p>Season: <span id="Season"></span></p>
+            <p>Fee: <span id="Fee"></span></p>
+            <p>Transport: <span id="Transport"></span></p>
     </div>
 </template>
 <div class="page-header">Turku SightSeeings</div>
