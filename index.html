@@ -111,8 +111,10 @@
                                 "Name": function (cell) {
                                     var cellText = cell.data;
                                     var url = cell.row.data.URLs;
+/*
                                     if (url != null && url.trim() != '')
                                         cellText = '<a target="userurl" href="' + url + '">' + cellText + '</a>';
+*/
 
                                     var type = cell.row.data.Type.trim();
                                     switch (type.toLowerCase()) {
@@ -202,26 +204,27 @@
                             grid.columns.filter(function(col){
                                 col.renderer = renderers[col.name];
                             });
-                            grid.rowDetailsGenerator = function(index) {
-                                var details = document.querySelector("#details").content;
+                            grid.rowDetailsGenerator = function(rowIndex) {
+                                var template = document.querySelector("#details");
+                                var elem = document.createElement("div");
+                                elem.setAttribute("class","details-container");
+                                template.model = grid.items[rowIndex];
+                                var details = template.content.querySelector("#row-details");
+                                elem.appendChild(document.importNode(details,true));
+                                return elem;
 
-                                var row = grid.data.source[index];
-                                for (var p in row) {
-                                    var elm = details.getElementById(p);
-                                    if(elm != null) elm.innerHTML = row[p];
-                                }
-                                return details;
                             };
                             var detailsOpenIndex = -1;
 
                             // Show details for the selected row
                             grid.items = data;
-                            grid.addEventListener('select', function() {
+                            grid.addEventListener('selected-items-changed', function(e) {
                                 grid.setRowDetailsVisible(detailsOpenIndex, false);
                                 var selected = grid.selection.selected();
-                                if (selected.length == 1) {
-                                    grid.setRowDetailsVisible(selected[0], true);
-                                    detailsOpenIndex = selected[0];
+                                if (selected.length > 0) {
+                                    grid.setRowDetailsVisible(detailsOpenIndex, false);
+                                    grid.setRowDetailsVisible(selected[selected.length-1], true);
+                                    detailsOpenIndex = selected[selected.length-1];
                                 }
                             });
                             document.body.className = ''
@@ -260,14 +263,16 @@
             }
         }
         HTMLImports.whenReady(initSpreadSheet('vaadin-grid', '1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE', 'od6'))
+
+
     </script>
 
 </head>
 
 <body class="wait loading-elements">
-<template id="details">
-    <div class="row-details">
-        <h1 id="Name"></h1>
+<template id="details" bind="model">
+    <div id="row-details">
+        <h1 id="Name">[[Name]]###[[name]]</h1>
         <h4 id="Type"></h4>
 
         <div id="Description">

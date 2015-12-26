@@ -56,6 +56,9 @@ google-map {
     width: 100%;
     text-align: left;
 }
+.details-container {
+    background-color: pink ;
+}
 /*Workaround - invisible scrolls*/
 vaadin-grid > div > div.vaadin-grid.style-scope.vaadin-grid-scroller.vaadin-grid-scroller-vertical {
     visibility: visible!important;

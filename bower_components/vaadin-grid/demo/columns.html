@@ -1,6 +1,10 @@
 <!doctype html>
 <html>
-
+<!--
+title: Columns
+order: 2
+layout: page
+-->
 <head>
   <title>vaadin-grid Code Examples – Columns</title>
   <meta charset="UTF-8">
@@ -28,9 +32,15 @@
       <vaadin-grid demo>
         <table>
           <colgroup>
-            <col header-text="First column">
-            <col header-text="Second column">
+            <col>
+            <col>
           </colgroup>
+          <thead>
+            <tr>
+              <th>First column</th>
+              <th>Second column</th>
+            </tr>
+          </thead>
           <tbody>
             <tr>
               <td>One</td>
@@ -47,8 +57,8 @@
           // code
           // Columns can also be configured in JS
           grid.columns = [
-            { headerContent: "First column" },
-            { headerContent: "Second column" }
+            { name: "firstColumn" },
+            { name: "secondColumn" }
           ];
           // end-code
           */
@@ -60,7 +70,7 @@
   <section>
     <h3>Adding Columns Dynamically</h3>
     <p>Columns can be added dynamically using the JavaScript API. You can also
-       modify the lightDom of the component, but it is not the recommended
+       modify the lightDom of the element, but it is not the recommended
        way.</p>
     <code-example source>
       <vaadin-grid demo hidden></vaadin-grid>
@@ -69,11 +79,11 @@
         var grid = grid || document.querySelector("vaadin-grid");
 
         HTMLImports.whenReady(function() {
-          grid.data.source = [["One", "Two"]];
+          grid.items = [["One", "Two"]];
           // code
-          grid.addColumn({ headerContent: "Column one" });
+          grid.addColumn({ name: "secondColumn" });
           // Specify the index or name of the column before which to add the new column
-          grid.addColumn({ headerContent: "I’m First"}, 0);
+          grid.addColumn({ name: "firstColumn"}, 0);
           // end-code
         });
       </code>
@@ -90,10 +100,17 @@
       <vaadin-grid demo>
         <table>
           <colgroup>
-            <col header-text="Name" width=100 flex=1>
-            <col header-text="Surname" max-width=200 flex=2>
-            <col header-text="Activity" min-width=100 flex=1>
+            <col width=100 flex=1>
+            <col max-width=200 flex=2>
+            <col min-width=100 flex=1>
           </colgroup>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Surname</th>
+              <th>Activity</th>
+            </tr>
+          </thead>
         </table>
       </vaadin-grid>
       <code hidden>
@@ -114,7 +131,7 @@
         var grid = grid || document.querySelector("vaadin-grid");
 
         HTMLImports.whenReady(function() {
-          grid.data.source = employees;
+          grid.items = employees;
           // code
           // Setting the width properties with JS api
           grid.columns[0].width = 100;
@@ -140,12 +157,21 @@
       <vaadin-grid selection-mode="multi" frozen-columns="1" demo>
         <table>
           <colgroup>
-            <col header-text="Name">
-            <col header-text="Surname">
-            <col header-text="Operation">
-            <col header-text="Product">
-            <col header-text="Progress">
+            <col>
+            <col>
+            <col>
+            <col>
+            <col>
           </colgroup>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Surname</th>
+              <th>Operation</th>
+              <th>Product</th>
+              <th>Progress</th>
+            </tr>
+          </thead>
         </table>
       </vaadin-grid>
       <code hidden>
@@ -166,7 +192,7 @@
         var grid = grid || document.querySelector("vaadin-grid");
 
         HTMLImports.whenReady(function() {
-          grid.data.source = employees;
+          grid.items = employees;
 
           grid.columns[4].renderer = function(cell) {
             cell.element.textContent = Math.random(1).toFixed(2);
@@ -190,11 +216,19 @@
       <vaadin-grid demo>
         <table>
           <colgroup>
-            <col header-text="Name">
-            <col header-text="Surname" hidable>
-            <col header-text="Activity" hidable hidden>
-            <col header-text="Target" hidden>
+            <col>
+            <col hidable>
+            <col hidable hidden>
+            <col hidden>
           </colgroup>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Surname</th>
+              <th>Activity</th>
+              <th>Target</th>
+            </tr>
+          </thead>
         </table>
       </vaadin-grid>
       <code hidden>
@@ -215,7 +249,7 @@
         var grid = grid || document.querySelector("vaadin-grid");
 
         HTMLImports.whenReady(function() {
-          grid.data.source = employees;
+          grid.items = employees;
           // code
           // Setting the properties with JS api
           grid.columns[1].hidable = true;

@@ -1,6 +1,6 @@
 {
   "name": "vaadin-grid",
-  "version": "0.9.0-beta2",
+  "version": "1.0.0",
   "authors": [
     "Vaadin Ltd"
   ],
@@ -8,7 +8,7 @@
   "keywords": [
     "web-components",
     "vaadin",
-    "vaadin components",
+    "vaadin elements",
     "grid"
   ],
   "main": "vaadin-grid.html",
@@ -24,23 +24,24 @@
     "wct.conf.js"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#v1.1.1",
-    "components-demo-resources": "vaadin/components-demo-resources#master"
+    "polymer": "Polymer/polymer#^1.1.1"
   },
   "devDependencies": {
-    "web-component-tester": "~3.3.21"
-  },
-  "resolutions": {
-    "polymer": "v1.1.1"
+    "web-component-tester": "~3.3.21",
+    "iron-test-helpers": "polymerelements/iron-test-helpers#~1.0.6",
+    "test-fixture": "polymerelements/test-fixture#~1.0.1",
+    "iron-component-page": "polymerelements/iron-component-page#~1.1.0",
+    "elements-demo-resources": "vaadin/elements-demo-resources#master"
   },
   "homepage": "https://github.com/vaadin/vaadin-grid",
-  "_release": "0.9.0-beta2",
+  "_release": "1.0.0",
   "_resolution": {
     "type": "version",
-    "tag": "0.9.0-beta2",
-    "commit": "b2d2457e1b6058ef3bd6a1b4ef17d652cf5c8e3a"
+    "tag": "1.0.0",
+    "commit": "35fcc30d59750f48a68695295dce56ce26def8e3"
   },
   "_source": "git://github.com/vaadin/vaadin-grid.git",
-  "_target": "0.9.0-beta2",
-  "_originalSource": "vaadin/vaadin-grid"
+  "_target": "~1.0.0",
+  "_originalSource": "vaadin-grid",
+  "_direct": true
 }

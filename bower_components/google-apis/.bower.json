@@ -34,6 +34,6 @@
     "commit": "352f9f2a8cfb0196faf12c6e229b00d92edc2a76"
   },
   "_source": "git://github.com/GoogleWebComponents/google-apis.git",
-  "_target": "^1.1.0",
+  "_target": "^1.1.1",
   "_originalSource": "GoogleWebComponents/google-apis"
 }
