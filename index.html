@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang='en'>
 <!--TODO sorting-->
+<!--TODO filtering-->
+<!--TODO responsive-->
+<!--TODO select all-->
+<!--TODO map integration-->
+<!--TODO season/open hours on map-->
 <!--TODO data retrieving element-->
 <head>
     <meta charset='UTF-8'>
@@ -14,7 +19,6 @@
     <!-- Import Web Components from bower -->
     <script src='bower_components/webcomponentsjs/webcomponents-lite.min.js'></script>
     <link href='bower_components/vaadin-grid/vaadin-grid.html' rel='import'>
-    <link href='bower_components/iron-collapse/iron-collapse.html' rel='import'>
     <link href='bower_components/google-map/google-map.html' rel='import'>
     <link href='bower_components/google-map/google-map-marker.html' rel='import'>
     <link href='bower_components/google-map/google-map-directions.html' rel='import'>
@@ -100,141 +104,41 @@
                             var data = [];
                             for (var i = 1; i < arrayData.length; i++) {
                                 var oldRow = arrayData[i];
-                                var newRow = {};
+                                var newRow = {"id": i};
                                 for (var j = 0; j < oldRow.length; j++)
                                     newRow[arrayData[0][j]] = arrayData[i][j];
                                 data.push(newRow)
                             }
 
                             var renderers = {
-                                "Name": function (cell) {
-                                    var cellText = cell.data;
-                                    var url = cell.row.data.URLs;
-/*
-                                    if (url != null && url.trim() != '')
-                                        cellText = '<a target="userurl" href="' + url + '">' + cellText + '</a>';
-*/
 
-                                    var type = cell.row.data.Type.trim();
-                                    switch (type.toLowerCase()) {
-                                        case '':
-                                        case 'null':
-                                            break;
-
-                                        case 'activity park':
-                                        case 'adventure park':
-                                            cellText += rendererUtils.mapTypeIcon('map-icon-archery', type);
-                                            break;
-                                        case 'castle':
-                                            cellText += rendererUtils.mapTypeIcon('map-icon-city-hall', type);
-                                            break;
-                                        case 'church':
-                                            cellText += rendererUtils.mapTypeIcon('map-icon-church', type);
-                                            break;
-                                        case 'museum':
-                                            cellText += rendererUtils.mapTypeIcon('map-icon-museum', type);
-                                            break;
-                                        case 'nature':
-                                        case 'nature park':
-                                            cellText += rendererUtils.mapTypeIcon('map-icon-climbing', type);
-                                            break;
-                                        case 'spa':
-                                            cellText += rendererUtils.mapTypeIcon('map-icon-spa', type);
-                                            break;
-                                        case 'ship cruise':
-                                            cellText += rendererUtils.mapTypeIcon('map-icon-boat-tour', type);
-                                            break;
-                                        case 'trail':
-                                        case 'trails':
-                                            cellText += rendererUtils.mapTypeIcon('map-icon-trail-walking', type);
-                                            break;
-                                        case 'trip':
-                                            cellText += rendererUtils.mapTypeIcon('map-icon-route', type);
-                                            break;
-                                        case 'water park':
-                                            cellText += rendererUtils.mapTypeIcon('map-icon-swimming', type);
-                                            break;
-                                        default:
-                                            cellText += '(' + type + ')'
-                                    }
-                                    cell.element.innerHTML = cellText
-                                },
-                                "Description": function (cell) {
-                                    var cellText = cell.data;
-                                    var url = cell.row.data.Map;
-                                    if (url != null && url.trim() != '')
-                                        cellText = '<a target="userMap" href="' + url + '">' + cellText + '</a>';
-                                    cell.element.innerHTML = cellText
-                                },
-                                "Open": function (cell) {
-                                    var cellText = cell.data;
-                                    var season = cell.row.data.Season;
-                                    if (season != null)
-                                        cellText += '/' + season;
-                                    cell.element.innerHTML = cellText
-                                },
+                                /*
+                                 "Open": function (cell) {
+                                 var cellText = cell.data;
+                                 var season = cell.row.data.Season;
+                                 if (season != null)
+                                 cellText += '/' + season;
+                                 cell.element.innerHTML = cellText
+                                 },
+                                 */
                                 "Duration": function (cell) {
                                     var cellText = cell.data;
                                     var dist = cell.row.data.Distance;
                                     if (dist != '0' && !isNaN(parseInt(dist)))
                                         cellText += ' (' + dist + 'km)';
                                     cell.element.innerHTML = cellText
-                                },
-                                "Fee": function (cell) {
-                                    var fee = cell.data.toUpperCase();
-                                    var html = '';
-                                    switch (fee) {
-                                        case 'P':
-                                            html = rendererUtils.vaadinTypeIcon('e60a', 'Paid', 'money');
-                                            break;
-                                        case 'O':
-                                            html = rendererUtils.vaadinTypeIcon('e77e', 'Paid Online', 'money');
-                                            break;
-                                        default:
-                                            html = rendererUtils.vaadinTypeIcon('A0', '', 'money');
-                                            break;
-                                    }
-                                    html += rendererUtils.renderTransport(cell.row.data.Transport);
-                                    cell.element.innerHTML = html;
                                 }
 
                             };
                             var grid = document.querySelector(gridQuerySelector);
-                            grid.columns.filter(function(col){
-                                col.renderer = renderers[col.name];
+                            grid.columns.filter(function (col) {
+                                var renderer = renderers[col.name];
+                                if (renderer != null) col.renderer = renderer;
                             });
-                            grid.rowDetailsGenerator = function(rowIndex) {
-                                var item = grid.items[rowIndex];
-                                var template = document.querySelector("#details");
-                                var detailsDiv = template.content.querySelector("#row-details-root").cloneNode(true);
-                                var fields = ["Description", "Type", "Open", "Duration", "Distance", "Season", "Fee", "Transport"];
-                                for (var i = 0; i < fields.length; i++) {
-                                    detailsDiv.querySelector("#" + fields[i]).innerHTML = item[fields[i]];
-                                }
-                                var urlTag = detailsDiv.querySelector("#url");
-                                if(item.URLs !=null){
-                                    urlTag.href=item.URLs;
-                                    urlTag.style.visibility="inherit";
-                                } else {
-                                    urlTag.style.visibility="hidden";
-                                }
-                                return detailsDiv;
 
-                            };
-                            var detailsOpenIndex = -1;
-
-                            // Show details for the selected row
                             grid.items = data;
-                            grid.addEventListener('selected-items-changed', function(e) {
-                                grid.setRowDetailsVisible(detailsOpenIndex, false);
-                                var selected = grid.selection.selected();
-                                if (selected.length > 0) {
-                                    grid.setRowDetailsVisible(detailsOpenIndex, false);
-                                    grid.setRowDetailsVisible(selected[selected.length-1], true);
-                                    detailsOpenIndex = selected[selected.length-1];
-                                }
-                            });
-                            document.body.className = ''
+
+                            initPage(grid);
                         }
                     }
 
@@ -245,74 +149,81 @@
         function showTooltip(elm) {
             if (elm.title != null && elm.title.trim() != "") alert(elm.title); else if (event.srcElement.title != null && event.srcElement.title.trim() != "") alert(elm.title);
         }
+        function initPage(grid) {
+            document.body.className = '';
+            navigator.geolocation.getCurrentPosition(function (position) {
+                var $ownPosition = document.querySelector("#own_position");
+                $ownPosition.longitude = position.coords.longitude;
+                $ownPosition.latitude = position.coords.latitude;
+                $ownPosition.removeAttribute("hidden")
+            });
+            var map = document.querySelector("google-map");
+            for (var i = 0; i < grid.items.length; i++) {
+                var item = grid.items[i];
+                var markerData = /@(-?\d+\.\d*),(-?\d+\.\d*)/.exec(item.Map);
+                if (markerData == null) continue;
 
-        function switchView() {
-            var collapseMap = document.querySelector("#collapse-map");
-            collapseMap.toggle();
-            var mapOpened = collapseMap.opened;
-            document.querySelector("#collapse-grid").opened = !mapOpened;
-            var map = document.querySelector("#map");
-            map.notifyResize();
-            map.clear();
-            var grid = document.querySelector("#grid");
-            if (mapOpened) {
-                grid.selection.selected(function (index) {
-                    var row = grid.data.source[index];
-                    var markerData = /@(-?\d+\.\d*),(-?\d+\.\d*)/.exec(row.Map);
-                    if (markerData == null) return;
-
-                    new google.maps.Marker({
-                        map: map.map,
-                        position: {lat: parseFloat(markerData[1]), lng: parseFloat(markerData[2])},
-                        title: row.Name
-                    });
-                })
+                var marker = document.createElement("google-map-marker");
+                marker.setAttribute("longitude", markerData[2]);
+                marker.setAttribute("latitude", markerData[1]);
+                marker.setAttribute("title", item.Name);
+                marker.setAttribute("id", item.id);
+                marker.map = map.map;
+                grid.se
             }
+
+
+            map.notifyResize();//Workaround
+
         }
         HTMLImports.whenReady(initSpreadSheet('vaadin-grid', '1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE', 'od6'))
 
 
     </script>
 
+    <template id="details" bind="model">
+        <div id="row-details-root">
+            <p>
+                <span class="details-type" id="Type"></span>:
+                <span id="Description"></span>
+                <a id="url" target="_blank" class="vaadin-icon">&#xe725;</a>
+            </p>
+
+            <p>Good for kids: <span id="Kid_Rate"></span></p>
+
+            <p>Open: <span id="Open"></span></p>
+
+            <p>Duration: <span id="Duration"></span></p>
+
+            <p>Distance, km: <span id="Distance"></span></p>
+
+            <p>Season: <span id="Season"></span></p>
+
+            <p>Fee: <span id="Fee"></span></p>
+
+            <p>Transport: <span id="Transport"></span></p>
+        </div>
+    </template>
+
 </head>
 
 <body class="wait loading-elements">
-<template id="details" bind="model">
-    <div id="row-details-root">
-        <p>
-            <span class="details-type" id="Type"></span>:
-            <span id="Description"></span>
-            <a id="url" target="_blank" class="vaadin-icon">&#xe725;</a>
-        </p>
-            <p>Good for kids: <span id="Kid_Rate"></span></p>
-            <p>Open: <span id="Open"></span></p>
-            <p>Duration: <span id="Duration"></span></p>
-            <p>Distance, km: <span id="Distance"></span></p>
-            <p>Season: <span id="Season"></span></p>
-            <p>Fee: <span id="Fee"></span></p>
-            <p>Transport: <span id="Transport"></span></p>
-    </div>
-</template>
-<div class="page-header">Turku SightSeeings</div>
+<div class="page-header">Turku Sightseeings</div>
+<div class="page-content">
 
-
-<button onclick='switchView()' class="heading">Map/Table</button>
-<iron-collapse id='collapse-map'>
     <google-map id='map' latitude='60.46' longitude='22.33'>
+        <google-map-marker id="own_position" latitude="60.50" longitude="22.34" draggable="false" hidden
+                           title="Your position" icon="icons/start-race-2.png"></google-map-marker>
+
     </google-map>
-</iron-collapse>
-<iron-collapse id='collapse-grid' opened>
     <vaadin-grid selection-mode="multi" id="grid">
         <table>
             <!-- Define the columns -->
             <col name="Name" header-text="Name" sortable="">
-            <col name="Description" header-text="Description & Map">
-            <col name="Kid_Rate" header-text="Kid rate">
-            <col name="Open" header-text="Open">
+            <col name="Type" header-text="Description & Map">
             <col name="Duration" header-text="Expected duration(Distance)">
-            <col name="Fee" header-text="Getting there">
         </table>
     </vaadin-grid>
-</iron-collapse>
+</div>
 </body>
 </html>
