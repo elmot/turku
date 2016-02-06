@@ -25,12 +25,22 @@
 
 
     <script onerror='alert(this)'>
-
+        var typeIcons = {
+            "activity park": "icons/playground.png",
+            "adventure park": "icons/festival.png",
+            "castle": "icons/castle-2.png",
+            "church": "icons/church-2.png",
+            "museum": "icons/museum_archeological.png",
+            "nature": "icons/flowers.png",
+            "nature park": "icons/hare1.png",
+            "ship cruise": "icons/cruiseship.png",
+            "spa": "icons/spa.png",
+            "trails": "icons/forest.png",
+            "trail": "icons/hiking.png",
+            "trip": "icons/map.png",
+            "water park": "icons/waterpark.png"
+        };
         var rendererUtils = {
-            vaadinTypeIcon: function (charCode, tooltip, additionalClasses) {
-                if (additionalClasses == null)  additionalClasses = '';
-                return '<span class="vaadin-icon icon ' + additionalClasses + '" title="' + tooltip + '">&#x' + charCode + ';</span>';
-            },
             mapTypeIcon: function (mapClass, tooltip, additionalClasses) {
                 if (additionalClasses == null)  additionalClasses = '';
                 return '<span class="icon map-icon ' + mapClass + ' ' + additionalClasses + '" title="' + tooltip + '" onclick="showTooltip(this)"></span>';
@@ -168,8 +178,8 @@
                 marker.setAttribute("latitude", markerData[1]);
                 marker.setAttribute("title", item.Name);
                 marker.setAttribute("id", item.id);
+                marker.icon = typeIcons[item.Type.toLowerCase()];
                 marker.map = map.map;
-                grid.se
             }
 
 
