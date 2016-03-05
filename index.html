@@ -114,7 +114,7 @@
                             var data = [];
                             for (var i = 1; i < arrayData.length; i++) {
                                 var oldRow = arrayData[i];
-                                var newRow = {"id": i};
+                                var newRow = {"id": "place" + i};
                                 for (var j = 0; j < oldRow.length; j++)
                                     newRow[arrayData[0][j]] = arrayData[i][j];
                                 data.push(newRow)
@@ -147,8 +147,19 @@
                             });
 
                             grid.items = data;
-
+                            grid.addEventListener("selected-items-changed", function(e) {
+                                var map = document.querySelector("google-map");
+                                grid.selection.selected().filter(function(e) {
+                                    var element = map.querySelector("#" + grid.items[e].id);
+                                    if(element!=null)element.map = map.map
+                                });
+                                grid.selection.deselected().filter(function(e) {
+                                    var element = map.querySelector("#" + grid.items[e].id);
+                                    if(element!=null)element.map = null
+                                });
+                            });
                             initPage(grid);
+                            grid.selection.selectAll();
                         }
                     }
 
@@ -156,9 +167,11 @@
                 script.src = sheetUrl
             }
         }
+
         function showTooltip(elm) {
             if (elm.title != null && elm.title.trim() != "") alert(elm.title); else if (event.srcElement.title != null && event.srcElement.title.trim() != "") alert(elm.title);
         }
+
         function initPage(grid) {
             document.body.className = '';
             navigator.geolocation.getCurrentPosition(function (position) {
@@ -179,7 +192,8 @@
                 marker.setAttribute("title", item.Name);
                 marker.setAttribute("id", item.id);
                 marker.icon = typeIcons[item.Type.toLowerCase()];
-                marker.map = map.map;
+                map.appendChild(marker);
+                //marker.map = map.map;
             }
 
 
