@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang='en'>
 <!--TODO sorting-->
-<!--TODO filtering-->
 <!--TODO responsive-->
-<!--TODO select all-->
-<!--TODO map integration-->
-<!--TODO season/open hours on map-->
 <!--TODO data retrieving element-->
+<!--TODO details-->
+<!--TODO2 filtering-->
+<!--TODO2 season/open hours on map-->
 <head>
     <meta charset='UTF-8'>
     <link rel="icon" sizes="16x16" href="Flag_of_turku_Finland.png">
@@ -149,13 +148,13 @@
                             grid.items = data;
                             grid.addEventListener("selected-items-changed", function(e) {
                                 var map = document.querySelector("google-map");
+                                var markers = map.querySelectorAll("google-map-marker");
+                                for(var i = 0; i < markers.length;i++) {
+                                    markers.item(i).map = null;
+                                }
                                 grid.selection.selected().filter(function(e) {
                                     var element = map.querySelector("#" + grid.items[e].id);
                                     if(element!=null)element.map = map.map
-                                });
-                                grid.selection.deselected().filter(function(e) {
-                                    var element = map.querySelector("#" + grid.items[e].id);
-                                    if(element!=null)element.map = null
                                 });
                             });
                             initPage(grid);
