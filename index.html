@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang='en'>
-<!--TODO sorting-->
 <!--TODO responsive-->
 <!--TODO data retrieving element-->
 <!--TODO details-->
+<!--TODO Clean up the code -->
 <!--TODO2 filtering-->
 <!--TODO2 season/open hours on map-->
 <head>
@@ -157,6 +157,22 @@
                                     if(element!=null)element.map = map.map
                                 });
                             });
+                            grid.addEventListener('sort-order-changed', function() {
+                                var colName1 = grid.columns[grid.sortOrder[0].column].name;
+                                var colName2;
+                                var lesser2;
+                                if(grid.sortOrder[1]) {
+                                    colName2 = grid.columns[grid.sortOrder[1].column].name;
+                                    lesser2 = grid.sortOrder[1].direction == 'asc' ? -1 : 1;
+                                }
+                                var lesser1 = grid.sortOrder[0].direction == 'asc' ? -1 : 1;
+                                data.sort(function(a, b) {
+                                    if(a[colName1] == b[colName1] && colName2 != null) {
+                                        return (a[colName2] < b[colName2]) ? lesser2 : -lesser2;
+                                    }
+                                    return (a[colName1] < b[colName1]) ? lesser1 : -lesser1;
+                                });
+                            });
                             initPage(grid);
                             grid.selection.selectAll();
                         }
@@ -234,7 +250,7 @@
 <div class="page-header">Turku Sightseeings</div>
 <div class="page-content">
 
-    <google-map id='map' latitude='60.46' longitude='22.33'>
+    <google-map id="map" latitude="60.18" longitude="21.99" zoom="9">
         <google-map-marker id="own_position" latitude="60.50" longitude="22.34" draggable="false" hidden
                            title="Your position" icon="icons/start-race-2.png"></google-map-marker>
 
@@ -243,7 +259,7 @@
         <table>
             <!-- Define the columns -->
             <col name="Name" header-text="Name" sortable="">
-            <col name="Type" header-text="Description & Map">
+            <col name="Type" header-text="Description & Map" sortable="">
             <col name="Duration" header-text="Expected duration(Distance)">
         </table>
     </vaadin-grid>
