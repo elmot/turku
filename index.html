@@ -18,12 +18,14 @@
     <!-- Import Web Components from bower -->
     <script src='bower_components/webcomponentsjs/webcomponents-lite.min.js'></script>
     <link href='bower_components/vaadin-grid/vaadin-grid.html' rel='import'>
-    <link href='bower_components/google-map/google-map.html' rel='import'>
-    <link href='bower_components/google-map/google-map-marker.html' rel='import'>
-    <link href='bower_components/google-map/google-map-directions.html' rel='import'>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAuK9aCv-ALTlzbq1tdnfvmCA76D7VEybc" type="application/javascript"></script>
 
 
     <script onerror='alert(this)'>
+        var map;
+        var markers = {};
+        var infoWindow = new google.maps.InfoWindow({content: "test"});
         var typeIcons = {
             "activity park": "icons/playground.png",
             "adventure park": "icons/festival.png",
@@ -38,53 +40,6 @@
             "trail": "icons/hiking.png",
             "trip": "icons/map.png",
             "water park": "icons/waterpark.png"
-        };
-        var rendererUtils = {
-            mapTypeIcon: function (mapClass, tooltip, additionalClasses) {
-                if (additionalClasses == null)  additionalClasses = '';
-                return '<span class="icon map-icon ' + mapClass + ' ' + additionalClasses + '" title="' + tooltip + '" onclick="showTooltip(this)"></span>';
-            },
-            renderTransport: function (transport) {
-                if (transport == null) return '';
-                transport = transport.toUpperCase().split(',');
-                var html = '';
-                for (var j = 0; j < transport.length; j++) {
-                    if (j > 0) html += ' , ';
-                    var k = transport[j];
-                    var routeLengthCss = '';
-                    var routeLengthPrefix = '';
-                    if (k.indexOf('LL') >= 0) {
-                        routeLengthPrefix = 'Very Long, ';
-                        routeLengthCss = 'transport-long-long';
-                    } else if (k.indexOf('L') >= 0) {
-                        routeLengthPrefix = 'Long, ';
-                        routeLengthCss = 'transport-long';
-                    }
-                    var trHtml = '';
-                    if (k.indexOf('B') >= 0) {
-                        trHtml += rendererUtils.mapTypeIcon('map-icon-bicycling', routeLengthPrefix + 'Bike');
-                    }
-                    if (k.indexOf('C') >= 0) {
-                        trHtml += rendererUtils.mapTypeIcon('map-icon-taxi-stand', routeLengthPrefix + 'Car');
-                    }
-                    if (k.indexOf('W') >= 0) {
-                        trHtml += rendererUtils.mapTypeIcon('map-icon-walking', routeLengthPrefix + 'Walk');
-                    }
-                    if (k.indexOf('Y') >= 0) {
-                        trHtml += rendererUtils.mapTypeIcon('map-icon-sailing', routeLengthPrefix + 'Yacht');
-                    }
-                    if (k.indexOf('S') >= 0) {
-                        trHtml += rendererUtils.mapTypeIcon('map-icon-boat-tour', routeLengthPrefix + 'Ship');
-                    }
-                    if (k.indexOf('F') >= 0) {
-                        trHtml += rendererUtils.mapTypeIcon('map-icon-boat-tour', routeLengthPrefix + 'Ferry');
-                    }
-                    if (routeLengthCss != '')
-                        trHtml = '<span class="' + routeLengthCss + '">' + trHtml + '</span>';
-                    html += trHtml;
-                }
-                return html;
-            }
         };
         function initSpreadSheet(gridQuerySelector, worksheetId, sheetId) {
             var sheetUrl = 'https://spreadsheets.google.com/feeds/cells/' + worksheetId + '/' + sheetId
@@ -120,16 +75,6 @@
                             }
 
                             var renderers = {
-
-                                /*
-                                 "Open": function (cell) {
-                                 var cellText = cell.data;
-                                 var season = cell.row.data.Season;
-                                 if (season != null)
-                                 cellText += '/' + season;
-                                 cell.element.innerHTML = cellText
-                                 },
-                                 */
                                 "Duration": function (cell) {
                                     var cellText = cell.data;
                                     var dist = cell.row.data.Distance;
@@ -146,31 +91,26 @@
                             });
 
                             grid.items = data;
-                            grid.addEventListener("selected-items-changed", function(e) {
-                                var map = document.querySelector("google-map");
-                                var markers = map.querySelectorAll("google-map-marker");
-                                for(var i = 0; i < markers.length;i++) {
-                                    var marker = markers.item(i);
-                                    if(marker.id != "own_position"){
-                                        marker.map = null;
-                                    }
+                            grid.addEventListener("selected-items-changed", function (e) {
+                                for (var markerId in markers) {
+                                    markers[markerId].setMap(null);
                                 }
-                                grid.selection.selected().filter(function(e) {
-                                    var element = map.querySelector("#" + grid.items[e].id);
-                                    if(element!=null)element.map = map.map
+                                grid.selection.selected().filter(function (e) {
+                                    var marker = markers[grid.items[e].id];
+                                    if (marker != null) marker.setMap(map)
                                 });
                             });
-                            grid.addEventListener('sort-order-changed', function() {
+                            grid.addEventListener('sort-order-changed', function () {
                                 var colName1 = grid.columns[grid.sortOrder[0].column].name;
                                 var colName2;
                                 var lesser2;
-                                if(grid.sortOrder[1]) {
+                                if (grid.sortOrder[1]) {
                                     colName2 = grid.columns[grid.sortOrder[1].column].name;
                                     lesser2 = grid.sortOrder[1].direction == 'asc' ? -1 : 1;
                                 }
                                 var lesser1 = grid.sortOrder[0].direction == 'asc' ? -1 : 1;
-                                data.sort(function(a, b) {
-                                    if(a[colName1] == b[colName1] && colName2 != null) {
+                                data.sort(function (a, b) {
+                                    if (a[colName1] == b[colName1] && colName2 != null) {
                                         return (a[colName2] < b[colName2]) ? lesser2 : -lesser2;
                                     }
                                     return (a[colName1] < b[colName1]) ? lesser1 : -lesser1;
@@ -186,66 +126,73 @@
             }
         }
 
-        function showTooltip(elm) {
-            if (elm.title != null && elm.title.trim() != "") alert(elm.title); else if (event.srcElement.title != null && event.srcElement.title.trim() != "") alert(elm.title);
-        }
-
         function initPage(grid) {
             document.body.className = '';
-            navigator.geolocation.getCurrentPosition(function (position) {
-                var $ownPosition = document.querySelector("#own_position");
-                $ownPosition.longitude = position.coords.longitude;
-                $ownPosition.latitude = position.coords.latitude;
-                $ownPosition.removeAttribute("hidden")
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: {lat: 60.18, lng: 21.99},
+                zoom: 9
             });
-            var map = document.querySelector("google-map");
+
             for (var i = 0; i < grid.items.length; i++) {
                 var item = grid.items[i];
                 var markerData = /@(-?\d+\.\d*),(-?\d+\.\d*)/.exec(item.Map);
-                if (markerData == null) continue;
+                if (markerData == null) {
+                    markerData = [0, 60.18, 21.99];
+                    console.log("Unparceable map link: " + item.Map)
+                }
 
-                var marker = document.createElement("google-map-marker");
-                marker.setAttribute("longitude", markerData[2]);
-                marker.setAttribute("latitude", markerData[1]);
-                marker.setAttribute("title", item.Name);
-                marker.setAttribute("id", item.id);
-                marker.icon = typeIcons[item.Type.toLowerCase()];
-                map.appendChild(marker);
-                //marker.map = map.map;
+                var marker = new google.maps.Marker({
+                    position: new google.maps.LatLng(markerData[1], markerData[2]),
+                    title: item.Name,
+                    icon: typeIcons[("" + item.Type).toLowerCase()],
+                    data: item,
+                    map: map
+                });
+                marker.addListener("click", function (e) {
+                    infoWindow.open(map, this);
+                });
+                markers[item.id] = marker;
             }
+            navigator.geolocation.getCurrentPosition(function (position) {
+                new google.maps.Marker({
+                    position: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+                    title: "You",
+                    icon: "icons/start-race-2.png",
+                    map: map
+                });
 
-
-            map.notifyResize();//Workaround
-
+            });
         }
         HTMLImports.whenReady(initSpreadSheet('vaadin-grid', '1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE', 'od6'))
 
 
     </script>
+    <dom-module id="place-details">
 
-    <template id="details" bind="model">
-        <div id="row-details-root">
-            <p>
-                <span class="details-type" id="Type"></span>:
-                <span id="Description"></span>
-                <a id="url" target="_blank" class="vaadin-icon">&#xe725;</a>
-            </p>
+        <template>
+            <div id="row-details-root">
+                <p>
+                    <span class="details-type" id="Type">{{place.Type}}</span>:
+                    <span id="Description"></span>
+                    <a id="url" target="_blank" class="vaadin-icon">&#xe725;</a>
+                </p>
 
-            <p>Good for kids: <span id="Kid_Rate"></span></p>
+                <p>Good for kids: {{}}</p>
 
-            <p>Open: <span id="Open"></span></p>
+                <p>Open: <span id="Open"></span></p>
 
-            <p>Duration: <span id="Duration"></span></p>
+                <p>Duration: <span id="Duration"></span></p>
 
-            <p>Distance, km: <span id="Distance"></span></p>
+                <p>Distance, km: <span id="Distance"></span></p>
 
-            <p>Season: <span id="Season"></span></p>
+                <p>Season: <span id="Season"></span></p>
 
-            <p>Fee: <span id="Fee"></span></p>
+                <p>Fee: <span id="Fee"></span></p>
 
-            <p>Transport: <span id="Transport"></span></p>
-        </div>
-    </template>
+                <p>Transport: <span id="Transport"></span></p>
+            </div>
+        </template>
+    </dom-module>
 
 </head>
 
@@ -253,11 +200,7 @@
 <div class="page-header">Turku Sightseeings</div>
 <div class="page-content">
 
-    <google-map id="map" latitude="60.18" longitude="21.99" zoom="9" apiKey="AIzaSyChIelYmLSslKQj5-eDiELbr20bDb_BWOo">
-        <google-map-marker id="own_position" latitude="60.50" longitude="22.34" draggable="false"
-                           title="Your position" icon="icons/start-race-2.png"><h1>U R HERE</h1></google-map-marker>
-
-    </google-map>
+    <div id="map"></div>
     <vaadin-grid selection-mode="multi" id="grid">
         <table>
             <!-- Define the columns -->

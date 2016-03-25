@@ -7,7 +7,7 @@ vaadin-grid {
     width: 49%;
 }
 
-google-map {
+#map {
     width: 50%;
     height:75vh;
 }
