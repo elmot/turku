@@ -150,7 +150,10 @@
                                 var map = document.querySelector("google-map");
                                 var markers = map.querySelectorAll("google-map-marker");
                                 for(var i = 0; i < markers.length;i++) {
-                                    markers.item(i).map = null;
+                                    var marker = markers.item(i);
+                                    if(marker.id != "own_position"){
+                                        marker.map = null;
+                                    }
                                 }
                                 grid.selection.selected().filter(function(e) {
                                     var element = map.querySelector("#" + grid.items[e].id);
@@ -250,9 +253,9 @@
 <div class="page-header">Turku Sightseeings</div>
 <div class="page-content">
 
-    <google-map id="map" latitude="60.18" longitude="21.99" zoom="9">
-        <google-map-marker id="own_position" latitude="60.50" longitude="22.34" draggable="false" hidden
-                           title="Your position" icon="icons/start-race-2.png"></google-map-marker>
+    <google-map id="map" latitude="60.18" longitude="21.99" zoom="9" apiKey="AIzaSyChIelYmLSslKQj5-eDiELbr20bDb_BWOo">
+        <google-map-marker id="own_position" latitude="60.50" longitude="22.34" draggable="false"
+                           title="Your position" icon="icons/start-race-2.png"><h1>U R HERE</h1></google-map-marker>
 
     </google-map>
     <vaadin-grid selection-mode="multi" id="grid">
