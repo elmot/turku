@@ -2,8 +2,6 @@
 <html lang='en'>
 <!--TODO responsive-->
 <!--TODO data retrieving element-->
-<!--TODO details-->
-<!--TODO Clean up the code -->
 <!--TODO2 filtering-->
 <!--TODO2 season/open hours on map-->
 <head>
@@ -14,18 +12,19 @@
     <link type='text/css' rel='stylesheet' href='css/loading.css'/>
     <link type='text/css' rel='stylesheet' href='css/styles.css'/>
     <link type='text/css' rel='stylesheet' href='fonts/Vaadin-Icons.css'/>
-    <link type='text/css' rel='stylesheet' href='fonts/map-icons.min.css'/>
     <!-- Import Web Components from bower -->
     <script src='bower_components/webcomponentsjs/webcomponents-lite.min.js'></script>
     <link href='bower_components/vaadin-grid/vaadin-grid.html' rel='import'>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAuK9aCv-ALTlzbq1tdnfvmCA76D7VEybc" type="application/javascript"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAuK9aCv-ALTlzbq1tdnfvmCA76D7VEybc"
+            type="application/javascript"></script>
 
+    <script type="application/javascript" src="micro-templating.js"></script>
 
-    <script onerror='alert(this)'>
+    <script>
         var map;
         var markers = {};
-        var infoWindow = new google.maps.InfoWindow({content: "test"});
+        var infoWindow = new google.maps.InfoWindow();
         var typeIcons = {
             "activity park": "icons/playground.png",
             "adventure park": "icons/festival.png",
@@ -39,9 +38,113 @@
             "trails": "icons/forest.png",
             "trail": "icons/hiking.png",
             "trip": "icons/map.png",
+            "unknown": "icons/sight-2.png",
             "water park": "icons/waterpark.png"
         };
-        function initSpreadSheet(gridQuerySelector, worksheetId, sheetId) {
+        var fees = {
+            "unknown": "???",
+            "f": "Free",
+            "p": "Paid",
+            "o": "Paid Online"
+        };
+
+        var transportCodes = {
+            "unknown": "?",
+            "w": " Walk",
+            "l": " Long",
+            "b": " Bicycle",
+            "c": " Car",
+            "f": "+Ferry",
+            "s": " Ship",
+            "y": "Yacht/Boat"
+        };
+        function convertTransport(v) {
+            var res = "";
+            var parts = v.split(",");
+            for (var i = 0; i < parts.length; i++) {
+                var part = parts[i].trim();
+                if(res!="") res+="<span class='or'> or </span>";
+                for (var j = 0; j < part.length; j++) {
+                    res+= decode(part.charAt(j), transportCodes)
+                }
+            }
+            return res;
+        }
+
+        function decode(name, map) {
+            var res = map[("" + name).toLowerCase()];
+            if (res == null) res = map.unknown;
+            return res;
+        }
+
+
+        function extractDataFromGoogleSheet(json) {
+            var arrayData = gdata.data = [];
+            for (var cellIdx = 0; cellIdx < json.feed.entry.length; cellIdx++) {
+                var cell = json.feed.entry[cellIdx];
+                var coords = /\/R(\d+)C(\d+)$/.exec(cell.id.$t);
+                var row = parseInt(coords[1]) - 1;
+                var column = parseInt(coords[2]) - 1;
+                if (arrayData[row] == null) arrayData[row] = [];
+                arrayData[row][column] = cell.content.$t
+            }
+            var data = [];
+            for (var i = 1; i < arrayData.length; i++) {
+                var oldRow = arrayData[i];
+                var newRow = {"id": "place" + i};
+                for (var j = 0; j < oldRow.length; j++)
+                    newRow[arrayData[0][j]] = arrayData[i][j];
+                data.push(newRow)
+            }
+            return data;
+        }
+
+        function initGrid(grid, data) {
+            var renderers = {
+                "Duration": function (cell) {
+                    var cellText = cell.data;
+                    if (cellText == null || cellText == "") cellText = "??";
+                    var dist = cell.row.data.Distance;
+                    if (dist != '0' && !isNaN(parseInt(dist)))
+                        cellText += ' (' + dist + 'km)';
+                    cell.element.innerHTML = cellText
+                }
+
+            };
+            grid.columns.filter(function (col) {
+                var renderer = renderers[col.name];
+                if (renderer != null) col.renderer = renderer;
+            });
+
+            grid.items = data;
+            grid.addEventListener("selected-items-changed", function () {
+                for (var markerId in markers) {
+                    markers[markerId].setMap(null);
+                }
+                grid.selection.selected().filter(function (e) {
+                    var marker = markers[grid.items[e].id];
+                    if (marker != null) marker.setMap(map)
+                });
+            });
+            grid.addEventListener('sort-order-changed', function () {
+                var colName1 = grid.columns[grid.sortOrder[0].column].name;
+                var colName2;
+                var lesser2;
+                if (grid.sortOrder[1]) {
+                    colName2 = grid.columns[grid.sortOrder[1].column].name;
+                    lesser2 = grid.sortOrder[1].direction == 'asc' ? -1 : 1;
+                }
+                var lesser1 = grid.sortOrder[0].direction == 'asc' ? -1 : 1;
+                data.sort(function (a, b) {
+                    if (a[colName1] == b[colName1] && colName2 != null) {
+                        return (a[colName2] < b[colName2]) ? lesser2 : -lesser2;
+                    }
+                    return (a[colName1] < b[colName1]) ? lesser1 : -lesser1;
+                });
+            });
+        }
+
+        function loadSpreadSheet(worksheetId, sheetId) {
             var sheetUrl = 'https://spreadsheets.google.com/feeds/cells/' + worksheetId + '/' + sheetId
                     + '/public/basic?alt=json-in-script';
 
@@ -56,68 +159,12 @@
                 gdata = {
                     io: {
                         handleScriptLoaded: function (json) {
-                            var arrayData = gdata.data = [];
-                            for (var cellIdx = 0; cellIdx < json.feed.entry.length; cellIdx++) {
-                                var cell = json.feed.entry[cellIdx];
-                                var coords = /\/R(\d+)C(\d+)$/.exec(cell.id.$t);
-                                var row = parseInt(coords[1]) - 1;
-                                var column = parseInt(coords[2]) - 1;
-                                if (arrayData[row] == null) arrayData[row] = [];
-                                arrayData[row][column] = cell.content.$t
-                            }
-                            var data = [];
-                            for (var i = 1; i < arrayData.length; i++) {
-                                var oldRow = arrayData[i];
-                                var newRow = {"id": "place" + i};
-                                for (var j = 0; j < oldRow.length; j++)
-                                    newRow[arrayData[0][j]] = arrayData[i][j];
-                                data.push(newRow)
-                            }
-
-                            var renderers = {
-                                "Duration": function (cell) {
-                                    var cellText = cell.data;
-                                    var dist = cell.row.data.Distance;
-                                    if (dist != '0' && !isNaN(parseInt(dist)))
-                                        cellText += ' (' + dist + 'km)';
-                                    cell.element.innerHTML = cellText
-                                }
-
-                            };
-                            var grid = document.querySelector(gridQuerySelector);
-                            grid.columns.filter(function (col) {
-                                var renderer = renderers[col.name];
-                                if (renderer != null) col.renderer = renderer;
-                            });
-
-                            grid.items = data;
-                            grid.addEventListener("selected-items-changed", function (e) {
-                                for (var markerId in markers) {
-                                    markers[markerId].setMap(null);
-                                }
-                                grid.selection.selected().filter(function (e) {
-                                    var marker = markers[grid.items[e].id];
-                                    if (marker != null) marker.setMap(map)
-                                });
-                            });
-                            grid.addEventListener('sort-order-changed', function () {
-                                var colName1 = grid.columns[grid.sortOrder[0].column].name;
-                                var colName2;
-                                var lesser2;
-                                if (grid.sortOrder[1]) {
-                                    colName2 = grid.columns[grid.sortOrder[1].column].name;
-                                    lesser2 = grid.sortOrder[1].direction == 'asc' ? -1 : 1;
-                                }
-                                var lesser1 = grid.sortOrder[0].direction == 'asc' ? -1 : 1;
-                                data.sort(function (a, b) {
-                                    if (a[colName1] == b[colName1] && colName2 != null) {
-                                        return (a[colName2] < b[colName2]) ? lesser2 : -lesser2;
-                                    }
-                                    return (a[colName1] < b[colName1]) ? lesser1 : -lesser1;
-                                });
-                            });
-                            initPage(grid);
+                            var data = extractDataFromGoogleSheet(json);
+                            var grid = document.querySelector('vaadin-grid');
+                            initGrid(grid, data);
                             grid.selection.selectAll();
+                            initMap(grid.items);
+                            document.body.className = ''; /* Hide progress loader and show a page content */
                         }
                     }
 
@@ -126,29 +173,29 @@
             }
         }
 
-        function initPage(grid) {
-            document.body.className = '';
+        /* Map support */
+        function initMap(items) {
             map = new google.maps.Map(document.getElementById('map'), {
                 center: {lat: 60.18, lng: 21.99},
                 zoom: 9
             });
 
-            for (var i = 0; i < grid.items.length; i++) {
-                var item = grid.items[i];
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
                 var markerData = /@(-?\d+\.\d*),(-?\d+\.\d*)/.exec(item.Map);
                 if (markerData == null) {
                     markerData = [0, 60.18, 21.99];
                     console.log("Unparceable map link: " + item.Map)
                 }
-
                 var marker = new google.maps.Marker({
                     position: new google.maps.LatLng(markerData[1], markerData[2]),
                     title: item.Name,
-                    icon: typeIcons[("" + item.Type).toLowerCase()],
+                    icon: decode(item.Type, typeIcons),
                     data: item,
                     map: map
                 });
-                marker.addListener("click", function (e) {
+                marker.addListener("click", function () {
+                    infoWindow.setContent(tmpl("placeDetails", this.data));
                     infoWindow.open(map, this);
                 });
                 markers[item.id] = marker;
@@ -163,36 +210,41 @@
 
             });
         }
-        HTMLImports.whenReady(initSpreadSheet('vaadin-grid', '1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE', 'od6'))
+
+        HTMLImports.whenReady(loadSpreadSheet( '1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE', 'od6'));
 
 
     </script>
-    <dom-module id="place-details">
 
-        <template>
-            <div id="row-details-root">
-                <p>
-                    <span class="details-type" id="Type">{{place.Type}}</span>:
-                    <span id="Description"></span>
-                    <a id="url" target="_blank" class="vaadin-icon">&#xe725;</a>
-                </p>
-
-                <p>Good for kids: {{}}</p>
-
-                <p>Open: <span id="Open"></span></p>
-
-                <p>Duration: <span id="Duration"></span></p>
-
-                <p>Distance, km: <span id="Distance"></span></p>
-
-                <p>Season: <span id="Season"></span></p>
-
-                <p>Fee: <span id="Fee"></span></p>
-
-                <p>Transport: <span id="Transport"></span></p>
+    <script type="text/html" id="placeDetails">
+        <div class="details">
+            <div class="details-name"><%=Name%>
+                <% if(URLs) {%>
+                <a target="_blank" class="vaadin-icon" href="<%= URLs %>">&#xe725;</a>
+                <% }%>
             </div>
-        </template>
-    </dom-module>
+            <div class="details-type"><%=Type %></div>
+
+            <div>Good for kids: <span><%=Kid_Rate%></span></div>
+
+            <div>Open hours: <span><%=Open%></span>
+                <% if(Season) {%>
+                Season: <span><%= Season %></span>
+                <% }%>
+            </div>
+
+            <div>Duration: <span><%=Duration%>
+                    <% if(Distance) {%>
+                    (<%=Distance%> km)
+                    <% }%>
+                    </span>
+            </div>
+
+            <div>Fee: <span><%=decode(Fee,fees)%></span></div>
+
+            <div>Transport: <span><%=convertTransport(Transport)%></span></div>
+        </div>
+    </script>
 
 </head>
 
@@ -203,7 +255,6 @@
     <div id="map"></div>
     <vaadin-grid selection-mode="multi" id="grid">
         <table>
-            <!-- Define the columns -->
             <col name="Name" header-text="Name" sortable="">
             <col name="Type" header-text="Description & Map" sortable="">
             <col name="Duration" header-text="Expected duration(Distance)">

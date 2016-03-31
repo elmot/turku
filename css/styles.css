@@ -34,6 +34,7 @@ vaadin-grid {
 }
 
 /*Grid rendering */
+/*noinspection CssNoGenericFontName*/
 .vaadin-icon {
     font-family: Vaadin-Icons;
 }
@@ -43,28 +44,37 @@ vaadin-grid {
     color: dodgerblue;
 }
 
-
-.transport-long {
-    border: 1px solid dodgerblue;
-    border-radius: 7px;
-    display: inline-block;
-    padding: 2px;
+.or {
+    font-style: italic;
+    color: darkslategray!important;
 }
-
-.transport-long-long {
-    border: 3px double dodgerblue;
-    border-radius: 9px;
-    display: inline-block;
-    padding: 2px;
-}
-
 .page-content {
     display: flex;
     flex-flow: row nowrap;
 }
-.details-container {
-    background-color: pink ;
+
+.details a {
+    text-decoration:none;
 }
+
+.details div {
+    color: darkslategray;
+}
+.details div span {
+    color: sienna;
+}
+
+.details-name {
+    font-size: 130%;
+    font-weight: bold;
+    color: darkgreen;
+}
+
+.details-type {
+    color: darkslateblue ;
+    font-weight: bold;
+}
+
 /*Workaround - invisible scrolls*/
 vaadin-grid > div > div.vaadin-grid.style-scope.vaadin-grid-scroller.vaadin-grid-scroller-vertical {
     visibility: visible!important;
