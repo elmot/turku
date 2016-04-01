@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang='en'>
-<!--TODO responsive-->
 <!--TODO data retrieving element-->
 <!--TODO2 filtering-->
 <!--TODO2 season/open hours on map-->
@@ -63,9 +62,9 @@
             var parts = v.split(",");
             for (var i = 0; i < parts.length; i++) {
                 var part = parts[i].trim();
-                if(res!="") res+="<span class='or'> or </span>";
+                if (res != "") res += "<span class='or'> or </span>";
                 for (var j = 0; j < part.length; j++) {
-                    res+= decode(part.charAt(j), transportCodes)
+                    res += decode(part.charAt(j), transportCodes)
                 }
             }
             return res;
@@ -164,7 +163,8 @@
                             initGrid(grid, data);
                             grid.selection.selectAll();
                             initMap(grid.items);
-                            document.body.className = ''; /* Hide progress loader and show a page content */
+                            document.body.className = '';
+                            /* Hide progress loader and show a page content */
                         }
                     }
 
@@ -211,7 +211,7 @@
             });
         }
 
-        HTMLImports.whenReady(loadSpreadSheet( '1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE', 'od6'));
+        HTMLImports.whenReady(loadSpreadSheet('1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE', 'od6'));
 
 
     </script>

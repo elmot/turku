@@ -1,22 +1,55 @@
-* {
-    box-sizing: border-box;
-}
-
-vaadin-grid {
-    height: 75vh;
-    width: 49%;
-}
-
-#map {
-    width: 50%;
-    height:75vh;
+body {
+    margin: 0;
+    padding: 0;
+    overflow:hidden;
 }
 
 .page-header {
-    font-size: 2em;
-    padding: 0.3em;
+    padding: 1vh;
+    font-size: 3vh;
     background-color: cornsilk;
     color: darkblue;
+    height: 3vh;
+}
+
+.page-content {
+    width: 100vw;
+    height: 95vh;
+    display: -webkit-flex; /* Safari */
+    display: flex;
+}
+
+.page-content {
+    flex-flow: row;
+    -webkit-flex-flow: row; /* Safari 6.1+ */
+}
+
+#map {
+    width: 65%;
+    height: 100%;
+}
+
+vaadin-grid {
+    height: calc(100% - 5px);
+    width: 35%;
+}
+
+@media (orientation: portrait) {
+    .page-content {
+        flex-flow: column;
+        -webkit-flex-flow: column; /* Safari 6.1+ */
+    }
+
+    #map {
+        width: 100%;
+        height: 65%;
+    }
+
+    vaadin-grid {
+        width: 100%;
+        height: calc(35% - 5px);
+    }
+
 }
 
 .heading {
@@ -28,7 +61,7 @@ vaadin-grid {
     border-top-right-radius: 5px;
     font-size: 5vh;
     cursor: pointer;
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     width: 100%;
     text-align: left;
 }
@@ -40,26 +73,24 @@ vaadin-grid {
 }
 
 .icon {
-    padding: 0.2em; font-size: 200%;
+    padding: 0.2em;
+    font-size: 200%;
     color: dodgerblue;
 }
 
 .or {
     font-style: italic;
-    color: darkslategray!important;
-}
-.page-content {
-    display: flex;
-    flex-flow: row nowrap;
+    color: darkslategray !important;
 }
 
 .details a {
-    text-decoration:none;
+    text-decoration: none;
 }
 
 .details div {
     color: darkslategray;
 }
+
 .details div span {
     color: sienna;
 }
@@ -71,18 +102,19 @@ vaadin-grid {
 }
 
 .details-type {
-    color: darkslateblue ;
+    color: darkslateblue;
     font-weight: bold;
 }
 
 /*Workaround - invisible scrolls*/
 vaadin-grid > div > div.vaadin-grid.style-scope.vaadin-grid-scroller.vaadin-grid-scroller-vertical {
-    visibility: visible!important;
-    width: 20px!important;
+    visibility: visible !important;
+    width: 20px !important;
 }
 
 vaadin-grid > div > div.vaadin-grid.style-scope.vaadin-grid-scroller.vaadin-grid-scroller-horizontal {
-    visibility: visible!important;
-    height: 20px!important;
+    visibility: visible !important;
+    height: 20px !important;
 }
+
 /*End of Workaround*/
