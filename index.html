@@ -19,8 +19,9 @@
             type="application/javascript"></script>
 
     <script type="application/javascript" src="micro-templating.js"></script>
+    <script type="application/javascript" src="google-sheets-datasource.js"></script>
 
-    <script>
+    <script type="application/javascript" name="Map Support">
         var map;
         var markers = {};
         var infoWindow = new google.maps.InfoWindow();
@@ -76,27 +77,75 @@
             return res;
         }
 
+        function initMap(items) {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: {lat: 60.18, lng: 21.99},
+                zoom: 9
+            });
 
-        function extractDataFromGoogleSheet(json) {
-            var arrayData = gdata.data = [];
-            for (var cellIdx = 0; cellIdx < json.feed.entry.length; cellIdx++) {
-                var cell = json.feed.entry[cellIdx];
-                var coords = /\/R(\d+)C(\d+)$/.exec(cell.id.$t);
-                var row = parseInt(coords[1]) - 1;
-                var column = parseInt(coords[2]) - 1;
-                if (arrayData[row] == null) arrayData[row] = [];
-                arrayData[row][column] = cell.content.$t
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                var markerData = /@(-?\d+\.\d*),(-?\d+\.\d*)/.exec(item.Map);
+                if (markerData == null) {
+                    markerData = [0, 60.18, 21.99];
+                    console.log("Unparceable map link: " + item.Map)
+                }
+                var marker = new google.maps.Marker({
+                    position: new google.maps.LatLng(markerData[1], markerData[2]),
+                    title: item.Name,
+                    icon: decode(item.Type, typeIcons),
+                    data: item,
+                    map: map
+                });
+                marker.addListener("click", function () {
+                    infoWindow.setContent(tmpl("placeDetails", this.data));
+                    infoWindow.open(map, this);
+                });
+                markers[item.id] = marker;
             }
-            var data = [];
-            for (var i = 1; i < arrayData.length; i++) {
-                var oldRow = arrayData[i];
-                var newRow = {"id": "place" + i};
-                for (var j = 0; j < oldRow.length; j++)
-                    newRow[arrayData[0][j]] = arrayData[i][j];
-                data.push(newRow)
-            }
-            return data;
+            navigator.geolocation.getCurrentPosition(function (position) {
+                new google.maps.Marker({
+                    position: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+                    title: "You",
+                    icon: "icons/start-race-2.png",
+                    map: map
+                });
+
+            });
         }
+    </script>
+
+    <script type="text/x-html-template" id="placeDetails" name="Map Info Window Template">
+        <div class="details">
+            <div class="details-name"><%=Name%>
+                <% if(URLs) {%>
+                <a target="_blank" class="vaadin-icon" href="<%= URLs %>">&#xe725;</a>
+                <% }%>
+            </div>
+            <div class="details-type"><%=Type %></div>
+
+            <div>Good for kids: <span><%=Kid_Rate%></span></div>
+
+            <div>Open hours: <span><%=Open%></span>
+                <% if(Season) {%>
+                Season: <span><%= Season %></span>
+                <% }%>
+            </div>
+
+            <div>Duration: <span><%=Duration%>
+                    <% if(Distance) {%>
+                    (<%=Distance%> km)
+                    <% }%>
+                    </span>
+            </div>
+
+            <div>Fee: <span><%=decode(Fee,fees)%></span></div>
+
+            <div>Transport: <span><%=convertTransport(Transport)%></span></div>
+        </div>
+    </script>
+
+    <script type="application/javascript" name="Grid Support">
 
         function initGrid(grid, data) {
             var renderers = {
@@ -143,108 +192,31 @@
             });
         }
 
-        function loadSpreadSheet(worksheetId, sheetId) {
-            var sheetUrl = 'https://spreadsheets.google.com/feeds/cells/' + worksheetId + '/' + sheetId
-                    + '/public/basic?alt=json-in-script';
+    </script>
 
-            return function () {
-                document.body.className = 'wait loading-data';
-                var script = document.createElement('script');
-                //noinspection JSUnusedLocalSymbols
-                script.onerror = function (event) {
-                    document.body.className = 'error'
-                };
-                document.head.appendChild(script);
-                gdata = {
-                    io: {
-                        handleScriptLoaded: function (json) {
-                            var data = extractDataFromGoogleSheet(json);
-                            var grid = document.querySelector('vaadin-grid');
-                            initGrid(grid, data);
-                            grid.selection.selectAll();
-                            initMap(grid.items);
-                            document.body.className = '';
-                            /* Hide progress loader and show a page content */
-                        }
-                    }
+    <script type="application/javascript" name="Initialization">
 
-                };
-                script.src = sheetUrl
-            }
-        }
+        HTMLImports.whenReady(function () {
+                    document.body.className = 'wait loading-data';
+                    GSDS.loadSpreadSheet('1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE', 'od6',
+                            function (data) {
+                                var grid = document.querySelector('vaadin-grid');
+                                initGrid(grid, data.rows);
+                                grid.selection.selectAll();
+                                initMap(grid.items);
+                                document.body.className = '';
+                            },
 
-        /* Map support */
-        function initMap(items) {
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: {lat: 60.18, lng: 21.99},
-                zoom: 9
-            });
-
-            for (var i = 0; i < items.length; i++) {
-                var item = items[i];
-                var markerData = /@(-?\d+\.\d*),(-?\d+\.\d*)/.exec(item.Map);
-                if (markerData == null) {
-                    markerData = [0, 60.18, 21.99];
-                    console.log("Unparceable map link: " + item.Map)
+                            function (event) {
+                                document.body.className = 'error';
+                                console.error(event);
+                            })
                 }
-                var marker = new google.maps.Marker({
-                    position: new google.maps.LatLng(markerData[1], markerData[2]),
-                    title: item.Name,
-                    icon: decode(item.Type, typeIcons),
-                    data: item,
-                    map: map
-                });
-                marker.addListener("click", function () {
-                    infoWindow.setContent(tmpl("placeDetails", this.data));
-                    infoWindow.open(map, this);
-                });
-                markers[item.id] = marker;
-            }
-            navigator.geolocation.getCurrentPosition(function (position) {
-                new google.maps.Marker({
-                    position: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
-                    title: "You",
-                    icon: "icons/start-race-2.png",
-                    map: map
-                });
-
-            });
-        }
-
-        HTMLImports.whenReady(loadSpreadSheet('1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE', 'od6'));
+        );
 
 
     </script>
 
-    <script type="text/html" id="placeDetails">
-        <div class="details">
-            <div class="details-name"><%=Name%>
-                <% if(URLs) {%>
-                <a target="_blank" class="vaadin-icon" href="<%= URLs %>">&#xe725;</a>
-                <% }%>
-            </div>
-            <div class="details-type"><%=Type %></div>
-
-            <div>Good for kids: <span><%=Kid_Rate%></span></div>
-
-            <div>Open hours: <span><%=Open%></span>
-                <% if(Season) {%>
-                Season: <span><%= Season %></span>
-                <% }%>
-            </div>
-
-            <div>Duration: <span><%=Duration%>
-                    <% if(Distance) {%>
-                    (<%=Distance%> km)
-                    <% }%>
-                    </span>
-            </div>
-
-            <div>Fee: <span><%=decode(Fee,fees)%></span></div>
-
-            <div>Transport: <span><%=convertTransport(Transport)%></span></div>
-        </div>
-    </script>
 
 </head>
 
