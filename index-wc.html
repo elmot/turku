@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang='en'>
+<!--TODO2 filtering-->
+<!--TODO2 season/open hours on map-->
+<head>
+    <meta charset='UTF-8'>
+    <link rel="icon" sizes="16x16" href="Flag_of_turku_Finland.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turku SightSeeings</title>
+    <link type='text/css' rel='stylesheet' href='css/loading.css'/>
+    <link type='text/css' rel='stylesheet' href='css/styles.css'/>
+    <link type='text/css' rel='stylesheet' href='fonts/Vaadin-Icons.css'/>
+    <!-- Import Web Components from bower -->
+    <script src='bower_components/webcomponentsjs/webcomponents-lite.min.js'></script>
+    <link href='bower_components/vaadin-grid/vaadin-grid.html' rel='import'>
+    <link href='google-spreadsheet-datasource/google-spreadsheet-datasource.html' rel='import'>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAuK9aCv-ALTlzbq1tdnfvmCA76D7VEybc"
+            type="application/javascript"></script>
+
+    <script type="application/javascript" src="micro-templating.js"></script>
+
+    <script type="application/javascript" name="Map Support">
+        var map;
+        var markers = {};
+        var infoWindow = new google.maps.InfoWindow();
+        var typeIcons = {
+            "activity park": "icons/playground.png",
+            "adventure park": "icons/festival.png",
+            "castle": "icons/castle-2.png",
+            "church": "icons/church-2.png",
+            "museum": "icons/museum_archeological.png",
+            "nature": "icons/flowers.png",
+            "nature park": "icons/hare1.png",
+            "ship cruise": "icons/cruiseship.png",
+            "spa": "icons/spa.png",
+            "trails": "icons/forest.png",
+            "trail": "icons/hiking.png",
+            "trip": "icons/map.png",
+            "unknown": "icons/sight-2.png",
+            "water park": "icons/waterpark.png"
+        };
+        var fees = {
+            "unknown": "???",
+            "f": "Free",
+            "p": "Paid",
+            "o": "Paid Online"
+        };
+
+        var transportCodes = {
+            "unknown": "?",
+            "w": " Walk",
+            "l": " Long",
+            "b": " Bicycle",
+            "c": " Car",
+            "f": "+Ferry",
+            "s": " Ship",
+            "y": "Yacht/Boat"
+        };
+        function convertTransport(v) {
+            var res = "";
+            var parts = v.split(",");
+            for (var i = 0; i < parts.length; i++) {
+                var part = parts[i].trim();
+                if (res != "") res += "<span class='or'> or </span>";
+                for (var j = 0; j < part.length; j++) {
+                    res += decode(part.charAt(j), transportCodes)
+                }
+            }
+            return res;
+        }
+
+        function decode(name, map) {
+            var res = map[("" + name).toLowerCase()];
+            if (res == null) res = map.unknown;
+            return res;
+        }
+
+        function initMap(items) {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: {lat: 60.18, lng: 21.99},
+                zoom: 9
+            });
+
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                var markerData = /@(-?\d+\.\d*),(-?\d+\.\d*)/.exec(item.Map);
+                if (markerData == null) {
+                    markerData = [0, 60.18, 21.99];
+                    console.log("Unparceable map link: " + item.Map)
+                }
+                var marker = new google.maps.Marker({
+                    position: new google.maps.LatLng(markerData[1], markerData[2]),
+                    title: item.Name,
+                    icon: decode(item.Type, typeIcons),
+                    data: item,
+                    map: map
+                });
+                marker.addListener("click", function () {
+                    infoWindow.setContent(tmpl("placeDetails", this.data));
+                    infoWindow.open(map, this);
+                });
+                markers[item.id] = marker;
+            }
+            navigator.geolocation.getCurrentPosition(function (position) {
+                new google.maps.Marker({
+                    position: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+                    title: "You",
+                    icon: "icons/start-race-2.png",
+                    map: map
+                });
+
+            });
+        }
+    </script>
+
+    <script type="text/x-html-template" id="placeDetails" name="Map Info Window Template">
+        <div class="details">
+            <div class="details-name"><%=Name%>
+                <% if(URLs) {%>
+                <a target="_blank" class="vaadin-icon" href="<%= URLs %>">&#xe725;</a>
+                <% }%>
+            </div>
+            <div class="details-type"><%=Type %></div>
+
+            <div>Good for kids: <span><%=Kid_Rate%></span></div>
+
+            <div>Open hours: <span><%=Open%></span>
+                <% if(Season) {%>
+                Season: <span><%= Season %></span>
+                <% }%>
+            </div>
+
+            <div>Duration: <span><%=Duration%>
+                    <% if(Distance) {%>
+                    (<%=Distance%> km)
+                    <% }%>
+                    </span>
+            </div>
+
+            <div>Fee: <span><%=decode(Fee,fees)%></span></div>
+
+            <div>Transport: <span><%=convertTransport(Transport)%></span></div>
+        </div>
+    </script>
+
+    <script type="application/javascript" name="Grid Support">
+
+        function initGrid(grid, data) {
+            var renderers = {
+                "Duration": function (cell) {
+                    var cellText = cell.data;
+                    if (cellText == null || cellText == "") cellText = "??";
+                    var dist = cell.row.data.Distance;
+                    if (dist != '0' && !isNaN(parseInt(dist)))
+                        cellText += ' (' + dist + 'km)';
+                    cell.element.innerHTML = cellText
+                }
+
+            };
+            grid.columns.filter(function (col) {
+                var renderer = renderers[col.name];
+                if (renderer != null) col.renderer = renderer;
+            });
+
+            grid.items = data;
+            grid.addEventListener("selected-items-changed", function () {
+                for (var markerId in markers) {
+                    markers[markerId].setMap(null);
+                }
+                grid.selection.selected().filter(function (e) {
+                    var marker = markers[grid.items[e].id];
+                    if (marker != null) marker.setMap(map)
+                });
+            });
+            grid.addEventListener('sort-order-changed', function () {
+                var colName1 = grid.columns[grid.sortOrder[0].column].name;
+                var colName2;
+                var lesser2;
+                if (grid.sortOrder[1]) {
+                    colName2 = grid.columns[grid.sortOrder[1].column].name;
+                    lesser2 = grid.sortOrder[1].direction == 'asc' ? -1 : 1;
+                }
+                var lesser1 = grid.sortOrder[0].direction == 'asc' ? -1 : 1;
+                data.sort(function (a, b) {
+                    if (a[colName1] == b[colName1] && colName2 != null) {
+                        return (a[colName2] < b[colName2]) ? lesser2 : -lesser2;
+                    }
+                    return (a[colName1] < b[colName1]) ? lesser1 : -lesser1;
+                });
+            });
+        }
+
+    </script>
+    <google-spreadsheet-datasource id="ds" documentid="1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE" sheetid="od6">
+
+    </google-spreadsheet-datasource>
+    <script type="application/javascript" name="Initialization">
+
+        document.getElementById("ds").addEventListener("dataloaded", function (event) {
+            var grid = document.querySelector('vaadin-grid');
+            initGrid(grid, event.detail.rows);
+            grid.selection.selectAll();
+            initMap(grid.items);
+            document.body.className = '';
+        });
+        document.getElementById("ds").addEventListener("error", function (event) {
+            document.body.className = 'error';
+            console.error(event);
+        });
+
+        HTMLImports.whenReady(function () {
+                    document.body.className = 'wait loading-data';
+                }
+        );
+
+
+    </script>
+
+
+</head>
+
+<body class="wait loading-elements">
+<div class="page-header">Turku Sightseeings</div>
+<div class="page-content">
+
+    <div id="map"></div>
+    <vaadin-grid selection-mode="multi" id="grid">
+        <table>
+            <col name="Name" header-text="Name" sortable="">
+            <col name="Type" header-text="Description & Map" sortable="">
+            <col name="Duration" header-text="Expected duration(Distance)">
+        </table>
+    </vaadin-grid>
+</div>
+</body>
+</html>

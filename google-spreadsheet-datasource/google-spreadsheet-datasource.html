@@ -1,0 +1,63 @@
+<!--
+<google-spreadsheet-datasource documentId="" sheetId="" ondataload="" onerror=""></google-spreadsheet-datasource>
+
+-->
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<script src="google-sheets-datasource.js" type="application/javascript"></script>
+
+<dom-module id="google-spreadsheet-datasource">
+    <script>
+        Polymer({
+            is: "google-spreadsheet-datasource",
+            refresh: function () {
+                console.log();
+                if (this.documentid == null || this.documentid == "") {
+                    console.info("document id is not defined");
+                    return;
+                }
+                if (this.sheetid == null || this.sheetid == "") {
+                    console.info("sheet id is not defined");
+                    return;
+                }
+                var that = this;
+                GSDS.loadSpreadSheet(this.documentid, this.sheetid,
+                        function (data) {
+                            that._loaded(data)
+                        }, function (event, documentId, sheetId) {
+                            that._error(event, documentId, sheetId);
+                        })
+            },
+            properties: {
+                documentid: {
+                    type: String,
+                    reflectToAttribute: true
+                }
+                ,
+                sheetid: {
+                    type: String,
+                    reflectToAttribute: true
+                }
+                ,
+                ondataload: {
+                    type: Function,
+                    reflectToAttribute: true
+                }
+            }
+            ,
+            ready: function () {
+                this.refresh();
+            }
+            ,
+            _loaded: function (data) {
+                this.fire("dataloaded", data)
+            }
+            ,
+            _error: function (e, documentId, sheetId) {
+                this.fire("error", e, documentId, sheetId);
+            }
+
+        })
+        ;
+    </script>
+</dom-module>
