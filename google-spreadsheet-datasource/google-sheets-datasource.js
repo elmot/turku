@@ -26,8 +26,8 @@ GSDS = {
      *
      * @param {string} documentId
      * @param {string} sheetId
-     * @param {function(rows [], sheetTitle, documentId, sheetId)} successCallback
-     * @param {function(Event event, documentId, sheetId)} errorCallback Function(Event event, documentId, sheetId)
+     * @param {function({rows , sheetTitle, documentId, sheetId})} successCallback
+     * @param {function(event, documentId, sheetId)} errorCallback Function(Event event, documentId, sheetId)
      */
     loadSpreadSheet: function (documentId, sheetId, successCallback, errorCallback) {
         var sheetUrl = 'https://spreadsheets.google.com/feeds/cells/' + documentId + '/' + sheetId
@@ -37,8 +37,14 @@ GSDS = {
 
         var script = document.createElement('script');
         script.onerror = function (event) {
+            var src = GSDS[objName]
             delete GSDS[objName];
-            errorCallback(event, this.documentId, this.sheetId);
+            if(src != null)
+            {
+                errorCallback(event, src.documentId, src.sheetId);
+            } else {
+                errorCallback(event);
+            }
         };
         document.head.appendChild(script);
         GSDS[objName] = {
