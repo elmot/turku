@@ -1,5 +1,18 @@
+/**
+ *
+ *
+ * @type {{loadSpreadSheet: Function }}
+ */
+
 GSDS = {
     _count: 1,
+    /**
+     *
+     * @param {string} documentId
+     * @param {string} sheetId
+     * @param {function(rows [], sheetTitle, documentId, sheetId)} successCallback
+     * @param {function(Event event, documentId, sheetId)} errorCallback Function(Event event, documentId, sheetId)
+     */
     loadSpreadSheet: function (documentId, sheetId, successCallback, errorCallback) {
         var sheetUrl = 'https://spreadsheets.google.com/feeds/cells/' + documentId + '/' + sheetId
             + '/public/basic?alt=json-in-script&callback=GSDS._a1.loaded';
