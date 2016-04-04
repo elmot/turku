@@ -1,0 +1,7 @@
+{
+  "name": "google-spreadsheet-datasource",
+  "version": "0.0.1",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.2.4"
+  }
+}
