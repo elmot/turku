@@ -192,14 +192,14 @@
         }
 
     </script>
-    <google-spreadsheet-datasource id="ds" documentid="1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE" sheetid="od6">
+    <google-spreadsheet-datasource id="ds" document-id="1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE" sheet-id="od6">
 
     </google-spreadsheet-datasource>
     <script type="application/javascript" name="Initialization">
 
-        document.getElementById("ds").addEventListener("dataloaded", function (event) {
+        document.getElementById("ds").addEventListener("data-changed", function (event) {
             var grid = document.querySelector('vaadin-grid');
-            initGrid(grid, event.detail.rows);
+            initGrid(grid, event.detail.value.rows);
             grid.selection.selectAll();
             initMap(grid.items);
             document.body.className = '';
@@ -209,8 +209,9 @@
             console.error(event);
         });
 
-        HTMLImports.whenReady(function () {
-                    document.body.className = 'wait loading-data';
+        document.addEventListener('WebComponentsReady', function(){
+                    if(document.body.className != "error")
+                        document.body.className = 'wait loading-data';
                 }
         );
 

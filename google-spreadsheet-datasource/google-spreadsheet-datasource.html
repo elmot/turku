@@ -10,49 +10,35 @@
     <script>
         Polymer({
             is: "google-spreadsheet-datasource",
+            properties: {
+                documentId: {
+                    type: String
+                },
+                sheetId: {
+                    type: String
+                },
+                data: {
+                    type:Object,
+                    notify:true
+                }
+            },
             refresh: function () {
-                console.log();
-                if (this.documentid == null || this.documentid == "") {
+                if (!this.documentId) {
                     console.info("document id is not defined");
                     return;
                 }
-                if (this.sheetid == null || this.sheetid == "") {
+                if (!this.sheetId) {
                     console.info("sheet id is not defined");
                     return;
                 }
-                var that = this;
-                GSDS.loadSpreadSheet(this.documentid, this.sheetid,
-                        function (data) {
-                            that._loaded(data)
-                        }, function (event, documentId, sheetId) {
-                            that._error(event, documentId, sheetId);
-                        })
+                GSDS.loadSpreadSheet(this.documentId, this.sheetId, this._loaded.bind(this), this._error.bind(this));
             },
-            properties: {
-                documentid: {
-                    type: String,
-                    reflectToAttribute: true
-                }
-                ,
-                sheetid: {
-                    type: String,
-                    reflectToAttribute: true
-                }
-                ,
-                ondataload: {
-                    type: Function,
-                    reflectToAttribute: true
-                }
-            }
-            ,
             ready: function () {
                 this.refresh();
-            }
-            ,
+            },
             _loaded: function (data) {
-                this.fire("dataloaded", data)
-            }
-            ,
+                this.data = data
+            },
             _error: function (e, documentId, sheetId) {
                 this.fire("error", e, documentId, sheetId);
             }

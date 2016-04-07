@@ -37,7 +37,8 @@ GSDS = {
 
         var script = document.createElement('script');
         script.onerror = function (event) {
-            var src = GSDS[objName]
+            var src = GSDS[objName];
+            script.parentNode.removeChild(script);
             delete GSDS[objName];
             if(src != null)
             {
@@ -53,6 +54,7 @@ GSDS = {
             index: GSDS._count,
             documentId: documentId,
             sheetId: sheetId,
+            script:script,
             successCallback: successCallback
         };
         GSDS._count++;
@@ -60,6 +62,7 @@ GSDS = {
     },
     _loaded: function (json) {
         delete GSDS[this.name];
+        this.script.parentNode.removeChild(this.script);
         var arrayData = [];
         for (var cellIdx = 0; cellIdx < json.feed.entry.length; cellIdx++) {
             var cell = json.feed.entry[cellIdx];

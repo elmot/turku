@@ -3,10 +3,18 @@ body.error * {
 }
 
 body.error:before {
-    content: "Cannot load data";
+    content: "Cannot load data.";
     text-align: center;
+    display: block;
     font-size: 10em;
     color: red;
+}
+body.error:after {
+    content: "See browser console.";
+    display: block;
+    text-align: center;
+    font-size: 3em;
+    color: darkslategrey;
 }
 
 body.error {

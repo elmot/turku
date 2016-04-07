@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang='en'>
-<!--TODO data retrieving element-->
 <!--TODO2 filtering-->
 <!--TODO2 season/open hours on map-->
 <head>
@@ -196,7 +195,7 @@
 
     <script type="application/javascript" name="Initialization">
 
-        HTMLImports.whenReady(function () {
+        document.addEventListener('WebComponentsReady', function() {
                     document.body.className = 'wait loading-data';
                     GSDS.loadSpreadSheet('1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE', 'od6',
                             function (data) {
