@@ -30,10 +30,10 @@ GSDS = {
      * @param {function(event, documentId, sheetId)} errorCallback Function(Event event, documentId, sheetId)
      */
     loadSpreadSheet: function (documentId, sheetId, successCallback, errorCallback) {
-        var sheetUrl = 'https://spreadsheets.google.com/feeds/cells/' + documentId + '/' + sheetId
-            + '/public/basic?alt=json-in-script&callback=GSDS._a1.loaded';
-
         var objName = ("_a" + GSDS._count);
+        var sheetUrl = 'https://spreadsheets.google.com/feeds/cells/' + documentId + '/' + sheetId
+            + '/public/basic?alt=json-in-script&callback=GSDS.' + objName  + '.loaded';
+
 
         var script = document.createElement('script');
         script.onerror = function (event) {
