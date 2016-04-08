@@ -10,9 +10,9 @@
     <link type='text/css' rel='stylesheet' href='css/loading.css'/>
     <link type='text/css' rel='stylesheet' href='css/styles.css'/>
     <link type='text/css' rel='stylesheet' href='fonts/Vaadin-Icons.css'/>
-    <!-- Import Web Components from bower -->
-    <script src='bower_components/webcomponentsjs/webcomponents-lite.min.js'></script>
-    <link href='bower_components/vaadin-grid/vaadin-grid.html' rel='import'>
+    <!-- Import Web Components from polygit -->
+    <script src="http://polygit.org/vaadin-*+vaadin+*/components/webcomponentsjs/webcomponents-lite.min.js"></script>
+    <link rel="import" href="http://polygit.org/vaadin-*+vaadin+*/components/vaadin-grid/vaadin-grid.html">
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAuK9aCv-ALTlzbq1tdnfvmCA76D7VEybc"
             type="application/javascript"></script>
@@ -195,7 +195,7 @@
 
     <script type="application/javascript" name="Initialization">
 
-        document.addEventListener('WebComponentsReady', function() {
+        document.addEventListener('WebComponentsReady', function () {
                     document.body.className = 'wait loading-data';
                     GSDS.loadSpreadSheet('1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE', 'od6',
                             function (data) {
@@ -220,7 +220,16 @@
 </head>
 
 <body class="wait loading-elements">
-<div class="page-header">Turku Sightseeings</div>
+<div class="page-header">Turku Sightseeings
+    <div class="source-links">
+        <a class="github" href="https://github.com/elmot/turku">Github repo</a><br>
+
+        <a class="google-sheets"
+           href="https://docs.google.com/spreadsheets/d/1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE/edit?usp=sharing">
+            <span class="vaadin-icon table">&#xe7a5;</span>&nbsp;
+            Source data</a>
+    </div>
+</div>
 <div class="page-content">
 
     <div id="map"></div>

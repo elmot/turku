@@ -1,7 +1,7 @@
 body {
     margin: 0;
     padding: 0;
-    overflow:hidden;
+    overflow: hidden;
 }
 
 .page-header {
@@ -33,6 +33,25 @@ vaadin-grid {
     height: calc(100% - 5px);
     width: 35%;
 }
+
+.source-links {
+    display: inline-block;
+    float: right;
+    font-size: 45%;
+}
+
+.github {
+    background-image: url("../icons/github-mark-32px.png");
+    background-repeat: no-repeat;
+    background-size: 1em;
+    padding-left: 1.5em;
+}
+.google-sheets {
+    background-size: 1em;
+}
+
+/*github" href="https://github.com/elmot/turku">Github repo</a>*/
+/*<a class="source-link google-sheets" href="https://docs.google.com/spreadsheets/d/1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE/edit?usp=sharing">Github repo</a>*/
 
 @media (orientation: portrait) {
     .page-content {
