@@ -12,8 +12,10 @@
     <link type='text/css' rel='stylesheet' href='fonts/Vaadin-Icons.css'/>
 
     <!-- Import Web Components from polygit -->
-    <script src="//cdn.rawgit.com/webcomponents/webcomponentsjs/v0.7.22/webcomponents-lite.min.js"></script>
-    <link rel="import" href="//polygit.org/vaadin-grid+vaadin+v1.1.2/components/vaadin-grid/vaadin-grid.html">
+    <script src="//cdn.rawgit.com/webcomponents/webcomponentsjs/v0.7.24/webcomponents-lite.min.js"></script>
+    <link rel="import" href="//polygit.org/vaadin-grid+vaadin+v2.0.0/components/vaadin-grid/vaadin-grid.html">
+    <link rel="import" href="//polygit.org/vaadin-grid+vaadin+v2.0.0/components/vaadin-grid/vaadin-grid-selection-column.html">
+    <link rel="import" href="//polygit.org/vaadin-grid+vaadin+v2.0.0/components/vaadin-grid/vaadin-grid-sorter.html">
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAuK9aCv-ALTlzbq1tdnfvmCA76D7VEybc"
             type="application/javascript"></script>
@@ -72,8 +74,8 @@
         }
 
         function decode(name, map) {
-            var res = map[("" + name).toLowerCase()];
-            if (res == null) res = map.unknown;
+            var res = map[("" + name).toLowerCase()] || null;
+            if (res === null) res = map.unknown;
             return res;
         }
 
@@ -86,7 +88,7 @@
             for (var i = 0; i < items.length; i++) {
                 var item = items[i];
                 var markerData = /@(-?\d+\.\d*),(-?\d+\.\d*)/.exec(item.Map);
-                if (markerData == null) {
+                if (markerData === null) {
                     markerData = [0, 60.18, 21.99];
                     console.log("Unparceable map link: " + item.Map)
                 }
@@ -148,58 +150,30 @@
     <script type="application/javascript" name="Grid Support">
 
         function initGrid(grid, data) {
-            var renderers = {
-                "Duration": function (cell) {
-                    var cellText = cell.data;
-                    if (cellText == null || cellText == "") cellText = "??";
-                    var dist = cell.row.data.Distance;
-                    if (dist != '0' && !isNaN(parseInt(dist)))
-                        cellText += ' (' + dist + 'km)';
-                    cell.element.innerHTML = cellText
-                }
-
-            };
-            grid.columns.filter(function (col) {
-                var renderer = renderers[col.name];
-                if (renderer != null) col.renderer = renderer;
-            });
-
             grid.items = data;
             grid.addEventListener("selected-items-changed", function () {
                 for (var markerId in markers) {
                     markers[markerId].setMap(null);
                 }
-                grid.selection.selected().filter(function (e) {
-                    var marker = markers[grid.items[e].id];
-                    if (marker != null) marker.setMap(map)
-                });
-            });
-            grid.addEventListener('sort-order-changed', function () {
-                var colName1 = grid.columns[grid.sortOrder[0].column].name;
-                var colName2;
-                var lesser2;
-                if (grid.sortOrder[1]) {
-                    colName2 = grid.columns[grid.sortOrder[1].column].name;
-                    lesser2 = grid.sortOrder[1].direction == 'asc' ? -1 : 1;
-                }
-                var lesser1 = grid.sortOrder[0].direction == 'asc' ? -1 : 1;
-                data.sort(function (a, b) {
-                    if (a[colName1] == b[colName1] && colName2 != null) {
-                        return (a[colName2] < b[colName2]) ? lesser2 : -lesser2;
-                    }
-                    return (a[colName1] < b[colName1]) ? lesser1 : -lesser1;
+                grid.selectedItems.filter(function (e) {
+                    var marker = markers[e.id]||null;
+                    if (marker !== null) marker.setMap(map)
                 });
             });
         }
 
     </script>
-    <google-spreadsheet-datasource id="ds" document-id="1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE" sheet-id="od6"></google-spreadsheet-datasource>
+    <google-spreadsheet-datasource id="ds" document-id="1JweHWyLI30MkZiGh1xpzDPynE9zehxQ3tuhZukCFzZE"
+                                   sheet-id="od6"></google-spreadsheet-datasource>
     <script type="application/javascript" name="Initialization">
 
-        document.getElementById("ds").addEventListener("data-changed", function (event) {
+        document.getElementById("ds").addEventListener("rows-changed", function (event) {
             var grid = document.querySelector('vaadin-grid');
-            initGrid(grid, event.detail.value.rows);
-            grid.selection.selectAll();
+            var items = event.detail.value;
+            initGrid(grid, items);
+            for (var i = 0; i < items.length; i++) {
+                grid.selectItem(items[i]);
+            }
             initMap(grid.items);
             document.body.className = '';
         });
@@ -208,10 +182,10 @@
             console.error(event);
         });
 
-        document.addEventListener('WebComponentsReady', function(){
-                    if(document.body.className != "error")
-                        document.body.className = 'wait loading-data';
-                }
+        document.addEventListener('WebComponentsReady', function () {
+                if (document.body.className !== "error")
+                    document.body.className = 'wait loading-data';
+            }
         );
 
 
@@ -234,12 +208,39 @@
 <div class="page-content">
 
     <div id="map"></div>
-    <vaadin-grid selection-mode="multi" id="grid">
-        <table>
-            <col name="Name" header-text="Name" sortable="">
-            <col name="Type" header-text="Description & Map" sortable="">
-            <col name="Duration" header-text="Expected duration(Distance)">
-        </table>
+    <!--todo details with polymer rendering-->
+    <vaadin-grid aria-label="List of places" items="{{ds.data.rows}}" id="grid" multi-sort="true">
+        <vaadin-grid-selection-column auto-select></vaadin-grid-selection-column>
+        <vaadin-grid-column>
+            <template class="header">
+                <vaadin-grid-sorter path="Name">Name</vaadin-grid-sorter>
+            </template>
+            <template>[[item.Name]]</template>
+        </vaadin-grid-column>
+        <vaadin-grid-column>
+            <template class="header">
+                <vaadin-grid-sorter path="Type">Description</vaadin-grid-sorter>
+            </template>
+            <template>[[item.Type]]</template>
+        </vaadin-grid-column>
+        <vaadin-grid-column>
+            <template class="header">
+                Duration<br/>Distance
+            </template>
+            <template>
+                <template is="dom-if" if="{{item.Duration}}">
+                    [[item.Duration]]
+                    <template is="dom-if" if="{{item.Distance}}">
+                        ([[item.Distance]] km)
+                    </template>
+                </template>
+                <template is="dom-if" if="{{!item.Duration}}">
+                    <template is="dom-if" if="{{item.Distance}}">
+                        [[item.Distance]] km
+                    </template>
+                </template>
+            </template>
+        </vaadin-grid-column>
     </vaadin-grid>
 </div>
 <script>
@@ -251,5 +252,6 @@
     ga('create', 'UA-76147928-2', 'auto');
     ga('send', 'pageview');
 
-</script></body>
+</script>
+</body>
 </html>

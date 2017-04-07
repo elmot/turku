@@ -16,8 +16,12 @@
                 sheetId: {
                     type: String
                 },
-                data: {
-                    type:Object,
+                rows: {
+                    type:Array,
+                    notify:true
+                },
+                title: {
+                    type:String,
                     notify:true
                 }
             },
@@ -34,9 +38,11 @@
             },
             ready: function () {
                 this.refresh();
+
             },
             _loaded: function (data) {
-                this.data = data
+                this.rows = data.rows;
+                this.title = data.title
             },
             _error: function (e, documentId, sheetId) {
                 this.fire("error", e, documentId, sheetId);

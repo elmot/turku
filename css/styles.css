@@ -30,7 +30,7 @@ body {
 }
 
 vaadin-grid {
-    height: calc(100% - 5px);
+    height: calc(100% - 5px)!important;
     width: 35%;
 }
 
@@ -124,15 +124,3 @@ vaadin-grid {
     font-weight: bold;
 }
 
-/*Workaround - invisible scrolls*/
-vaadin-grid > div > div.vaadin-grid.style-scope.vaadin-grid-scroller.vaadin-grid-scroller-vertical {
-    visibility: visible !important;
-    width: 20px !important;
-}
-
-vaadin-grid > div > div.vaadin-grid.style-scope.vaadin-grid-scroller.vaadin-grid-scroller-horizontal {
-    visibility: visible !important;
-    height: 20px !important;
-}
-
-/*End of Workaround*/
