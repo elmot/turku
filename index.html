@@ -3,7 +3,6 @@
 <html lang='en'>
 <!--TODO2 filtering-->
 <!--TODO2 season/open hours on map-->
-<!--TODO get rid of getElementBy-->
 <head>
     <meta charset='UTF-8'>
     <link rel="icon" sizes="16x16" href="Flag_of_turku_Finland.png">
@@ -110,7 +109,6 @@
                         transport: convertTransport(this.data.Transport)
                     };
                     infoWindow.setContent(document.getElementById("placeDetails").stamp(dataObject).root.firstElementChild.innerHTML);
-//                    infoWindow.setContent(tmpl("placeDetails", this.data));
                     infoWindow.open(map, this);
                 });
                 markers[item.id] = marker;
@@ -206,7 +204,6 @@
 <div class="page-content">
 
     <div id="map"></div>
-    <!--todo details with polymer rendering-->
     <vaadin-grid aria-label="List of places" items="{{ds.data.rows}}" id="grid" multi-sort="true">
         <vaadin-grid-selection-column auto-select></vaadin-grid-selection-column>
         <vaadin-grid-column>
